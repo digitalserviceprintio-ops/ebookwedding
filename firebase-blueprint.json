@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Profil pengguna / pengantin penyelenggara acara pernikahan",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "ID Pengguna Firebase Auth" },
+        "email": { "type": "string", "description": "Alamat email pengguna" },
+        "displayName": { "type": "string", "description": "Nama lengkap pengguna" },
+        "weddingTitle": { "type": "string", "description": "Judul acara pernikahan (misal Kevin & Clarissa)" },
+        "weddingDate": { "type": "string", "description": "Tanggal acara pernikahan" },
+        "createdAt": { "type": "number", "description": "Timestamp pembuatan akun" }
+      },
+      "required": ["uid", "email", "displayName"]
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Data tamu undangan dalam buku tamu digital pernikahan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID unik tamu" },
+        "userId": { "type": "string", "description": "ID pemilik akun pernikahan" },
+        "name": { "type": "string", "description": "Nama lengkap tamu" },
+        "gender": { "type": "string", "enum": ["pria", "wanita"] },
+        "origin": { "type": "string", "description": "Asal kota / instansi / relasi tamu" },
+        "category": { "type": "string", "enum": ["VIP", "Reguler", "Keluarga"] },
+        "time": { "type": "string", "description": "Waktu kedatangan tamu" },
+        "timestamp": { "type": "number", "description": "Timestamp Unix kedatangan tamu" },
+        "hasEnvelope": { "type": "boolean", "description": "Menyerahkan amplop atau tidak" },
+        "envelopeNominal": { "type": "number", "description": "Nominal amplop dalam rupiah" },
+        "envelopeMethod": { "type": "string", "enum": ["tunai", "transfer", "qris"] },
+        "hasGift": { "type": "boolean", "description": "Membawa bingkisan kado fisik" },
+        "giftDescription": { "type": "string", "description": "Deskripsi barang kado" },
+        "giftShelf": { "type": "string", "description": "Nomor rak penyimpanan kado" },
+        "prayerWish": { "type": "string", "description": "Doa dan ucapan selamat pernikahan" },
+        "checkedInBy": { "type": "string", "description": "Nama petugas resepsionis atau RSVP Mandiri" },
+        "isVerified": { "type": "boolean", "description": "Status verifikasi kehadiran" },
+        "paxCount": { "type": "number", "description": "Jumlah orang yang hadir" }
+      },
+      "required": ["id", "userId", "name", "gender", "origin", "time", "timestamp"]
+    },
+    "GalleryPhoto": {
+      "title": "GalleryPhoto",
+      "description": "Dokumentasi foto momen acara pernikahan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "ID unik foto" },
+        "userId": { "type": "string", "description": "ID pemilik akun pernikahan" },
+        "url": { "type": "string", "description": "URL foto dokumentasi" },
+        "caption": { "type": "string", "description": "Keterangan foto" },
+        "time": { "type": "string", "description": "Waktu pengambilan foto" },
+        "tag": { "type": "string", "description": "Kategori label foto" },
+        "uploadedBy": { "type": "string", "description": "Nama pengunggah foto" },
+        "timestamp": { "type": "number", "description": "Timestamp unggah" }
+      },
+      "required": ["id", "userId", "url", "caption", "time", "tag"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Dokumen profil masing-masing pengguna"
+    },
+    "/users/{userId}/guests/{guestId}": {
+      "schema": "Guest",
+      "description": "Daftar buku tamu pernikahan milik pengguna tertentu (terisolasi per akun)"
+    },
+    "/users/{userId}/photos/{photoId}": {
+      "schema": "GalleryPhoto",
+      "description": "Galeri foto dokumentasi pernikahan milik pengguna tertentu (terisolasi per akun)"
+    }
+  }
+}

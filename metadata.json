@@ -1,0 +1,6 @@
+{
+  "name": "EBook Wedding - Kevin & Clarissa",
+  "description": "Aplikasi buku tamu digital, meja resepsionis, dokumentasi momen galeri, dan laporan rekapitulasi pernikahan Kevin & Clarissa",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

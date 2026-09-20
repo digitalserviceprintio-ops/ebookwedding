@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: is user authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: is owner of the user account
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Helper: validate user profile data
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'displayName']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.displayName is string;
+    }
+
+    // Helper: validate guest entry
+    function isValidGuest(data) {
+      return data.keys().hasAll(['id', 'name', 'gender', 'origin', 'time', 'timestamp']) &&
+             data.id is string &&
+             data.name is string &&
+             data.name.size() > 0 &&
+             data.name.size() <= 150 &&
+             data.gender in ['pria', 'wanita'] &&
+             data.origin is string &&
+             data.time is string &&
+             data.timestamp is number;
+    }
+
+    // User profile documents
+    match /users/{userId} {
+      // Anyone can read basic wedding info for RSVP form, owner can read all
+      allow read: if true;
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Guests subcollection: isolated per user/account
+      match /guests/{guestId} {
+        // Owner can read and manage their own guests list
+        allow read: if isOwner(userId);
+        // Owner can create/update/delete, or guests can self-register RSVP
+        allow create: if isValidGuest(request.resource.data) && (isOwner(userId) || request.resource.data.userId == userId);
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // Photos subcollection: isolated per user/account
+      match /photos/{photoId} {
+        allow read: if isOwner(userId);
+        allow create, update, delete: if isOwner(userId);
+      }
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
