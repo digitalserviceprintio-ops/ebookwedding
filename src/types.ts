@@ -23,6 +23,10 @@ export interface Guest {
   checkedInBy: string;
   isVerified: boolean;
   paxCount?: number;
+  phone?: string;
+  rsvpStatus?: 'hadir' | 'ragu' | 'tidak_hadir';
+  isRsvp?: boolean;
+  souvenirTaken?: boolean;
 }
 
 export interface GalleryPhoto {

@@ -11,6 +11,7 @@ import {
   subscribeUserPhotos, 
   saveUserPhoto, 
   removeUserPhoto, 
+  submitPublicRSVP,
   logoutUser 
 } from './lib/firebase';
 import { Header } from './components/Header';
@@ -24,11 +25,13 @@ import { QRScanModal } from './components/QRScanModal';
 import { GuestDetailModal } from './components/GuestDetailModal';
 import { RSVPModal } from './components/RSVPModal';
 import { AuthView } from './components/AuthView';
+import { FallingParticles } from './components/FallingParticles';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('buku-tamu');
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [particlesEnabled, setParticlesEnabled] = useState(true);
 
   const [session, setSession] = useState<UserSession>(() => {
     try {
@@ -267,6 +270,13 @@ export default function App() {
     if (firebaseUser) {
       await saveUserGuest(firebaseUser.uid, { ...newGuest, userId: firebaseUser.uid });
     } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUid = urlParams.get('u') || 'demo-wedding-organizer';
+      try {
+        await submitPublicRSVP(targetUid, newGuest);
+      } catch (err) {
+        console.warn('Public RSVP cloud persist fallback:', err);
+      }
       setGuests((prev) => [newGuest, ...prev]);
     }
   };
@@ -280,15 +290,16 @@ export default function App() {
   // Loading Screen
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#fbf8ff] flex flex-col items-center justify-center p-4">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#775a19] to-[#261900] text-[#ffdea5] flex items-center justify-center shadow-lg mb-4 animate-pulse">
-          <span className="font-headline text-lg font-bold">K &amp; C</span>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50/60 via-white to-orange-50/40 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <FallingParticles enabled={particlesEnabled} />
+        <div className="w-16 h-16 rounded-2xl glass-panel text-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/10 mb-4 animate-pulse border border-white/80">
+          <span className="font-headline text-xl font-bold">K &amp; C</span>
         </div>
-        <p className="font-headline text-base font-semibold text-[#775a19]">
-          Memuat Sesi Cloud EBook Wedding...
+        <p className="font-headline text-base font-bold text-[#c2410c]">
+          Memuat EBook Wedding...
         </p>
-        <span className="text-xs text-[#7f7667] mt-1">
-          Menghubungkan ke Google Cloud Firestore
+        <span className="text-xs text-orange-900/60 mt-1">
+          Menghubungkan ke Cloud Firestore
         </span>
       </div>
     );
@@ -297,7 +308,8 @@ export default function App() {
   // Not logged in: Show Registration / Login Gate (Required to access Dashboard)
   if (!firebaseUser) {
     return (
-      <>
+      <div className="relative min-h-screen overflow-hidden">
+        <FallingParticles enabled={particlesEnabled} />
         <AuthView
           onOpenRSVP={() => setIsRSVPOpen(true)}
           onLoginSuccess={() => {
@@ -311,13 +323,23 @@ export default function App() {
           onClose={() => setIsRSVPOpen(false)}
           onSubmitRSVP={handleRSVPSubmitted}
         />
-      </>
+      </div>
     );
   }
 
   // Logged in: Render Full Dashboard for this User
   return (
-    <div className="min-h-screen bg-[#fbf8ff] text-[#1b1b21] flex flex-col selection:bg-[#ffdea5] selection:text-[#261900]">
+    <div className="min-h-screen bg-gradient-to-br from-[#fffbf7] via-[#ffffff] to-[#fff7ed] text-[#1f160f] flex flex-col selection:bg-orange-200 selection:text-orange-950 relative overflow-x-hidden">
+      {/* Ambient glowing glass backdrop circles */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-gradient-to-br from-orange-400/15 to-amber-300/20 blur-3xl" />
+        <div className="absolute top-1/3 -right-32 w-80 h-80 rounded-full bg-gradient-to-br from-orange-400/12 to-rose-300/15 blur-3xl" />
+        <div className="absolute -bottom-24 left-1/4 w-96 h-96 rounded-full bg-gradient-to-tr from-amber-400/15 to-orange-400/15 blur-3xl" />
+      </div>
+
+      {/* Floating Blossom & Snow Particles Overlay */}
+      <FallingParticles enabled={particlesEnabled} />
+
       {/* Top Header Bar with Live Cloud Sync indicator */}
       <Header
         session={session}
@@ -325,12 +347,15 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenAdminPortal={() => setActiveTab('akun-admin')}
         onOpenQRScan={() => setIsQRScanOpen(true)}
+        particlesEnabled={particlesEnabled}
+        onToggleParticles={() => setParticlesEnabled((p) => !p)}
+        guestCount={guests.length}
       />
 
       {/* Main Content Area */}
       <main
-        className={`flex-1 w-full max-w-md mx-auto relative ${
-          activeTab === 'akun-admin' ? 'pt-4' : 'pt-20'
+        className={`flex-1 w-full max-w-7xl mx-auto relative z-10 transition-all ${
+          activeTab === 'akun-admin' ? 'pt-4 md:pt-8' : 'pt-20 md:pt-24'
         }`}
       >
         {activeTab === 'buku-tamu' && (
@@ -339,6 +364,7 @@ export default function App() {
             onAddGuestClick={() => setActiveTab('input-tamu')}
             onSelectGuest={(guest) => setSelectedGuest(guest)}
             onOpenQRScan={() => setIsQRScanOpen(true)}
+            onOpenRSVP={() => setIsRSVPOpen(true)}
             onImportGuests={handleImportGuests}
             onToggleVerified={handleToggleVerified}
           />
@@ -349,6 +375,7 @@ export default function App() {
             guestCount={guests.length}
             onGuestCreated={handleGuestCreated}
             onOpenQRScan={() => setIsQRScanOpen(true)}
+            onOpenRSVP={() => setIsRSVPOpen(true)}
             initialPrefill={prefillGuest}
           />
         )}
@@ -393,6 +420,7 @@ export default function App() {
         onClose={() => setIsQRScanOpen(false)}
         onScanSuccess={handleQRScanSuccess}
         onOpenRSVP={() => setIsRSVPOpen(true)}
+        userId={firebaseUser?.uid}
       />
 
       {/* Self-Service RSVP & Buku Tamu Digital Mandiri Modal */}

@@ -40,7 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-[#fbf8ff]/92 backdrop-blur-xl border-t border-[#e4e1ea]/60 shadow-[0_-2px_12px_rgba(119,90,25,0.06)] no-print">
+    <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/85 backdrop-blur-2xl border-t border-orange-100/80 shadow-[0_-4px_24px_rgba(234,88,12,0.08)] no-print md:hidden">
       <div className="max-w-md mx-auto grid grid-cols-5 items-center h-16 px-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -50,21 +50,21 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               onClick={() => setActiveTab(tab.id)}
               className={`relative flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 transition-all active:scale-95 ${
                 isActive
-                  ? 'text-[#775a19] font-bold'
-                  : 'text-[#4e4639]/80 hover:text-[#1b1b21]'
+                  ? 'text-orange-600 font-bold'
+                  : 'text-orange-950/60 hover:text-orange-900'
               }`}
             >
               {isActive && (
-                <span className="absolute -top-1 w-6 h-1 rounded-full bg-[#775a19]"></span>
+                <span className="absolute -top-1 w-7 h-1 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 shadow-xs shadow-orange-500/50"></span>
               )}
               <span
                 className={`material-symbols-outlined text-2xl transition-transform ${
-                  isActive ? 'scale-110 fill-1 text-[#775a19]' : 'text-[#7f7667]'
+                  isActive ? 'scale-110 fill-1 text-orange-600' : 'text-stone-400'
                 }`}
               >
                 {tab.icon}
               </span>
-              <span className="font-body text-[10.5px] tracking-tight truncate max-w-[64px]">
+              <span className={`font-body text-[10.5px] tracking-tight truncate max-w-[64px] ${isActive ? 'text-orange-600 font-bold' : 'text-stone-500'}`}>
                 {tab.label}
               </span>
             </button>

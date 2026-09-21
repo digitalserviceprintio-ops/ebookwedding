@@ -4,59 +4,126 @@
   --font-headline: "Playfair Display", Georgia, serif;
   --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --color-primary: #775a19;
-  --color-primary-container: #c5a059;
-  --color-primary-fixed: #ffdea5;
-  --color-primary-fixed-dim: #e9c176;
+  /* Orange Kulit Jeruk (Citrus Orange Peel) & Putih Theme */
+  --color-primary: #ea580c;
+  --color-primary-container: #fdba74;
+  --color-primary-fixed: #ffedd5;
+  --color-primary-fixed-dim: #fed7aa;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #4e3700;
-  --color-on-primary-fixed: #261900;
-  --color-on-primary-fixed-variant: #5d4201;
+  --color-on-primary-container: #7c2d12;
+  --color-on-primary-fixed: #431407;
+  --color-on-primary-fixed-variant: #9a3412;
 
-  --color-secondary: #92484f;
-  --color-secondary-container: #ffa2a9;
-  --color-secondary-fixed: #ffdadb;
-  --color-secondary-fixed-dim: #ffb2b8;
+  --color-secondary: #f97316;
+  --color-secondary-container: #fed7aa;
+  --color-secondary-fixed: #ffedd5;
+  --color-secondary-fixed-dim: #ffedd5;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #7a353d;
-  --color-on-secondary-fixed: #3c0610;
-  --color-on-secondary-fixed-variant: #753139;
+  --color-on-secondary-container: #7c2d12;
+  --color-on-secondary-fixed: #431407;
+  --color-on-secondary-fixed-variant: #9a3412;
 
-  --color-tertiary: #735c00;
-  --color-tertiary-container: #c5a129;
-  --color-tertiary-fixed: #ffe088;
-  --color-tertiary-fixed-dim: #e9c349;
+  --color-tertiary: #c2410c;
+  --color-tertiary-container: #fdba74;
+  --color-tertiary-fixed: #ffedd5;
+  --color-tertiary-fixed-dim: #fed7aa;
   --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #493900;
-  --color-on-tertiary-fixed: #241a00;
-  --color-on-tertiary-fixed-variant: #574500;
+  --color-on-tertiary-container: #431407;
+  --color-on-tertiary-fixed: #431407;
+  --color-on-tertiary-fixed-variant: #7c2d12;
 
-  --color-surface: #fbf8ff;
-  --color-surface-dim: #dbd9e1;
-  --color-surface-bright: #fbf8ff;
+  --color-surface: #fffbf6;
+  --color-surface-dim: #faeee0;
+  --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f5f2fb;
-  --color-surface-container: #efecf5;
-  --color-surface-container-high: #eae7ef;
-  --color-surface-container-highest: #e4e1ea;
-  --color-surface-variant: #e4e1ea;
-  --color-surface-tint: #775a19;
+  --color-surface-container-low: #fff8f1;
+  --color-surface-container: #fef2e6;
+  --color-surface-container-high: #ffedd5;
+  --color-surface-container-highest: #fed7aa;
+  --color-surface-variant: #ffedd5;
+  --color-surface-tint: #ea580c;
 
-  --color-on-surface: #1b1b21;
-  --color-on-surface-variant: #4e4639;
-  --color-inverse-surface: #303036;
-  --color-inverse-on-surface: #f2eff8;
-  --color-outline: #7f7667;
-  --color-outline-variant: #d1c5b4;
+  --color-on-surface: #1f160f;
+  --color-on-surface-variant: #6b4d38;
+  --color-inverse-surface: #2d2119;
+  --color-inverse-on-surface: #fff7ed;
+  --color-outline: #b48e72;
+  --color-outline-variant: #fed7aa;
 }
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-surface);
+  background: linear-gradient(135deg, #fffbf6 0%, #ffffff 50%, #fff7ed 100%);
   color: var(--color-on-surface);
   margin: 0;
   padding: 0;
+  min-height: 100vh;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Glassmorphism Reusable Classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 30px -5px rgba(234, 88, 12, 0.08), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(234, 88, 12, 0.06), 0 0 0 1px rgba(255, 237, 213, 0.4);
+}
+
+.glass-card-interactive {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(234, 88, 12, 0.06), 0 0 0 1px rgba(255, 237, 213, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-interactive:hover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(253, 186, 116, 0.8);
+  box-shadow: 0 12px 30px -4px rgba(234, 88, 12, 0.14), 0 0 0 1px rgba(249, 115, 22, 0.2);
+  transform: translateY(-2px);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(254, 215, 170, 0.8);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: #ffffff;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+  outline: none;
+}
+
+.btn-citrus-primary {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(234, 88, 12, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-citrus-primary:hover {
+  background: linear-gradient(135deg, #fb923c 0%, #c2410c 100%);
+  box-shadow: 0 6px 18px 0 rgba(234, 88, 12, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-citrus-primary:active {
+  transform: scale(0.98);
 }
 
 .font-headline {

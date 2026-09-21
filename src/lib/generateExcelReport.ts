@@ -78,12 +78,12 @@ export function exportToExcel({
       g.gender === 'pria' ? 'L' : 'P',
       g.origin || '-',
       g.category || 'Reguler',
-      g.status === 'checked-in' ? 'Hadir' : 'Belum Hadir',
+      g.isVerified ? 'Terverifikasi' : 'Hadir',
       g.hasEnvelope && g.envelopeNominal ? g.envelopeNominal : 0,
       g.envelopeMethod ? g.envelopeMethod.toUpperCase() : '-',
       g.hasGift ? g.giftDescription || 'Kado' : '-',
       g.giftShelf || '-',
-      g.notes || '-',
+      g.prayerWish || '-',
     ]);
   });
 
@@ -106,6 +106,30 @@ export function exportToExcel({
 
   // 5. Create Worksheet
   const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+  // Format currency cells in data rows and summary row
+  const startDataRow = 10; // 0-indexed row for first guest data
+  const endDataRow = startDataRow + guests.length;
+
+  for (let r = startDataRow; r < endDataRow; r++) {
+    const nominalCellRef = XLSX.utils.encode_cell({ r, c: 7 }); // Column H (Nominal Amplop)
+    if (ws[nominalCellRef] && typeof ws[nominalCellRef].v === 'number') {
+      ws[nominalCellRef].z = '#,##0';
+    }
+  }
+
+  // Format Total Row (at endDataRow + 1)
+  const totalRowIndex = endDataRow + 1;
+  const totalNominalCellRef = XLSX.utils.encode_cell({ r: totalRowIndex, c: 7 });
+  if (ws[totalNominalCellRef] && typeof ws[totalNominalCellRef].v === 'number') {
+    ws[totalNominalCellRef].z = '"Rp "#,##0';
+  }
+
+  // Format header summary nominal cell (Row 7, Column B => r: 7, c: 1)
+  const summaryStatRef = XLSX.utils.encode_cell({ r: 7, c: 1 });
+  if (ws[summaryStatRef] && typeof ws[summaryStatRef].v === 'number') {
+    ws[summaryStatRef].z = '"Rp "#,##0';
+  }
 
   // Define Column Widths (in characters) so cells are neat and never cut off
   ws['!cols'] = [

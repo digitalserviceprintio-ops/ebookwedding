@@ -36,7 +36,10 @@
         "prayerWish": { "type": "string", "description": "Doa dan ucapan selamat pernikahan" },
         "checkedInBy": { "type": "string", "description": "Nama petugas resepsionis atau RSVP Mandiri" },
         "isVerified": { "type": "boolean", "description": "Status verifikasi kehadiran" },
-        "paxCount": { "type": "number", "description": "Jumlah orang yang hadir" }
+        "paxCount": { "type": "number", "description": "Jumlah orang yang hadir" },
+        "phone": { "type": "string", "description": "Nomor kontak WhatsApp tamu" },
+        "rsvpStatus": { "type": "string", "enum": ["hadir", "ragu", "tidak_hadir"] },
+        "isRsvp": { "type": "boolean", "description": "Status apakah data berasal dari form RSVP online" }
       },
       "required": ["id", "userId", "name", "gender", "origin", "time", "timestamp"]
     },
@@ -55,9 +58,22 @@
         "timestamp": { "type": "number", "description": "Timestamp unggah" }
       },
       "required": ["id", "userId", "url", "caption", "time", "tag"]
+    },
+    "TestConnection": {
+      "title": "TestConnection",
+      "description": "Dokumen verifikasi koneksi Firestore saat booting aplikasi",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "description": "Status koneksi" },
+        "timestamp": { "type": "number", "description": "Waktu tes koneksi" }
+      }
     }
   },
   "firestore": {
+    "/test/{docId}": {
+      "schema": "TestConnection",
+      "description": "Path verifikasi konektivitas backend Firestore"
+    },
     "/users/{userId}": {
       "schema": "UserProfile",
       "description": "Dokumen profil masing-masing pengguna"

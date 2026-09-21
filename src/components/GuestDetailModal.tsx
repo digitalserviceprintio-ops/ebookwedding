@@ -110,75 +110,77 @@ export const GuestDetailModal: React.FC<GuestDetailModalProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in"
+      className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white text-[#1b1b21] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-[#e4e1ea]/70 flex flex-col max-h-[92vh]"
+        className="glass-card bg-white/95 text-stone-900 w-full max-w-lg md:max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-orange-200/80 flex flex-col max-h-[90vh]"
       >
-        {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-[#c5a059] to-[#775a19] p-3.5 text-white flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-2xl text-[#ffe088]">
-              how_to_reg
-            </span>
+        {/* Header Ribbon with Orange Gradient */}
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 text-white flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-2xl text-white">
+                how_to_reg
+              </span>
+            </div>
             <div>
-              <span className="font-body text-[10px] tracking-widest uppercase text-white/80 block">
+              <span className="font-body text-[10px] sm:text-[11px] tracking-widest uppercase text-white/90 font-bold block">
                 Detail Kehadiran Tamu
               </span>
-              <h3 className="font-headline text-[16px] font-semibold text-white leading-tight">
+              <h3 className="font-headline text-base sm:text-lg font-bold text-white leading-tight">
                 {guest.name}
               </h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center text-white transition-colors"
           >
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-4 overflow-y-auto space-y-3 font-body text-[12.5px]">
+        <div className="p-4 sm:p-6 overflow-y-auto font-body text-xs sm:text-sm">
           {isEditing ? (
-            <form onSubmit={handleSaveEdit} className="space-y-2.5">
+            <form onSubmit={handleSaveEdit} className="space-y-3">
               <div>
-                <label className="text-[11px] text-[#7f7667] font-bold block">Nama Lengkap</label>
+                <label className="text-xs text-stone-600 font-bold block mb-1">Nama Lengkap</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[13px] font-semibold"
+                  className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm font-semibold outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] text-[#7f7667] font-bold block">Asal / Relasi</label>
+                <label className="text-xs text-stone-600 font-bold block mb-1">Asal / Relasi</label>
                 <input
                   type="text"
                   value={editOrigin}
                   onChange={(e) => setEditOrigin(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[13px]"
+                  className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-[#7f7667] font-bold block">Nominal Amplop (Rp)</label>
+                  <label className="text-xs text-stone-600 font-bold block mb-1">Nominal Amplop (Rp)</label>
                   <input
                     type="number"
                     value={editNominal}
                     onChange={(e) => setEditNominal(parseInt(e.target.value, 10) || 0)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[13px] font-bold text-[#775a19]"
+                    className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm font-bold text-orange-700 outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#7f7667] font-bold block">Metode Pembayaran</label>
+                  <label className="text-xs text-stone-600 font-bold block mb-1">Metode Pembayaran</label>
                   <select
                     value={editMethod}
                     onChange={(e) => setEditMethod(e.target.value as EnvelopeMethod)}
-                    className="w-full px-2 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[12px]"
+                    className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="tunai">Tunai / Kotak</option>
                     <option value="qris">QRIS / Transfer</option>
@@ -186,207 +188,213 @@ export const GuestDetailModal: React.FC<GuestDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] text-[#7f7667] font-bold block">Deskripsi Kado</label>
+                  <label className="text-xs text-stone-600 font-bold block mb-1">Deskripsi Kado</label>
                   <input
                     type="text"
                     value={editGift}
                     onChange={(e) => setEditGift(e.target.value)}
                     placeholder="Kosongkan jika tidak ada"
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[12px]"
+                    className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] text-[#7f7667] font-bold block">Nomor Rak Kado</label>
+                  <label className="text-xs text-stone-600 font-bold block mb-1">Nomor Rak Kado</label>
                   <input
                     type="text"
                     value={editShelf}
                     onChange={(e) => setEditShelf(e.target.value)}
                     placeholder="Contoh: K-42"
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-[#e4e1ea] bg-[#f5f2fb] text-[12px]"
+                    className="w-full px-3 py-2 rounded-xl border border-orange-200 bg-orange-50/50 text-sm outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2.5 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2 bg-[#775a19] text-white rounded-lg font-bold text-[12px] shadow-xs"
+                  className="flex-1 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-md active:scale-95 transition-all"
                 >
                   Simpan Perubahan
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-2 bg-[#eae7ef] text-[#1b1b21] rounded-lg text-[12px]"
+                  className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors"
                 >
                   Batal
                 </button>
               </div>
             </form>
           ) : (
-            <>
-              {/* Status Bar */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#f5f2fb] border border-[#e4e1ea]/60">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      guest.gender === 'wanita' ? 'bg-[#92484f]' : 'bg-slate-600'
-                    }`}
-                  ></span>
-                  <span className="font-bold text-[#1b1b21]">
-                    {guest.gender === 'wanita' ? 'Tamu Wanita' : 'Tamu Pria'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded-full bg-[#ffdea5] text-[#261900] text-[10px] font-bold uppercase">
-                    {guest.category}
-                  </span>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-1 rounded-md bg-white hover:bg-[#eae7ef] text-[#775a19] border border-[#e4e1ea]"
-                    title="Edit Tamu"
-                  >
-                    <span className="material-symbols-outlined text-sm">edit</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Details list */}
-              <div className="space-y-2">
-                <div className="flex justify-between border-b border-[#efecf5] pb-1.5">
-                  <span className="text-[#7f7667]">Asal / Relasi:</span>
-                  <span className="font-semibold text-[#1b1b21]">{guest.origin}</span>
-                </div>
-
-                <div className="flex justify-between border-b border-[#efecf5] pb-1.5">
-                  <span className="text-[#7f7667]">Waktu Check-In:</span>
-                  <span className="font-semibold text-[#1b1b21]">{guest.time}</span>
-                </div>
-
-                <div className="flex justify-between border-b border-[#efecf5] pb-1.5">
-                  <span className="text-[#7f7667]">Lokasi Petugas:</span>
-                  <span className="font-semibold text-[#775a19]">{guest.checkedInBy}</span>
-                </div>
-
-                <div className="flex justify-between border-b border-[#efecf5] pb-1.5">
-                  <span className="text-[#7f7667]">Titipan Amplop:</span>
-                  <span className="font-bold text-[#775a19]">
-                    {guest.hasEnvelope ? formatRupiah(guest.envelopeNominal) : 'Tidak ada'}
-                    {guest.envelopeMethod ? ` (${guest.envelopeMethod.toUpperCase()})` : ''}
-                  </span>
-                </div>
-
-                <div className="flex justify-between border-b border-[#efecf5] pb-1.5">
-                  <span className="text-[#7f7667]">Kado Fisik:</span>
-                  <span className="font-semibold text-[#92484f]">
-                    {guest.hasGift ? guest.giftDescription || 'Souvenir' : 'Tidak ada'}
-                    {guest.giftShelf ? ` • Rak ${guest.giftShelf}` : ''}
-                  </span>
-                </div>
-              </div>
-
-              {/* Doa & Ucapan */}
-              {guest.prayerWish && (
-                <div className="p-2.5 rounded-xl bg-[#f5f2fb] border border-[#e4e1ea]/60 space-y-1">
-                  <span className="text-[10px] font-bold text-[#775a19] uppercase tracking-wider block">
-                    Doa &amp; Ucapan Pengantin:
-                  </span>
-                  <p className="font-body text-[11.5px] italic text-[#4e4639] leading-relaxed">
-                    "{guest.prayerWish}"
-                  </p>
-                </div>
-              )}
-
-              {/* Authentic Souvenir Token Voucher with Live Generated QR Code */}
-              <div
-                id="souvenir-slip"
-                className="p-3 rounded-xl border border-dashed border-[#c5a059] bg-[#fffbf2] text-center space-y-2 relative"
-              >
-                <div className="text-[10px] text-[#7f7667] uppercase font-bold tracking-widest">
-                  Kupon Souvenir &amp; Penukaran
-                </div>
-
-                {qrCodeUrl ? (
-                  <div className="flex justify-center">
-                    <img
-                      src={qrCodeUrl}
-                      alt="QR Souvenir"
-                      className="w-28 h-28 object-contain rounded p-1 bg-white border border-[#e4e1ea] shadow-xs"
-                    />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+              {/* Left Column on Desktop: Info & Wishes (md:col-span-7) */}
+              <div className="md:col-span-7 space-y-3.5">
+                {/* Status Bar */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-orange-50/80 border border-orange-200/70">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-3 h-3 rounded-full ${
+                        guest.gender === 'wanita' ? 'bg-rose-500' : 'bg-sky-600'
+                      }`}
+                    ></span>
+                    <span className="font-bold text-stone-900">
+                      {guest.gender === 'wanita' ? 'Tamu Wanita' : 'Tamu Pria'}
+                    </span>
                   </div>
-                ) : (
-                  <div className="w-28 h-28 mx-auto bg-white border border-[#e4e1ea] rounded flex items-center justify-center text-xs text-gray-400">
-                    Membuat QR...
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-900 text-[11px] font-bold uppercase tracking-wider border border-orange-200">
+                      {guest.category}
+                    </span>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="p-1 rounded-lg bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 shadow-xs transition-colors"
+                      title="Edit Tamu"
+                    >
+                      <span className="material-symbols-outlined text-sm">edit</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Details list */}
+                <div className="space-y-2.5 bg-white/70 rounded-xl p-3 border border-orange-100 shadow-xs">
+                  <div className="flex justify-between border-b border-orange-100 pb-2">
+                    <span className="text-stone-500">Asal / Relasi:</span>
+                    <span className="font-semibold text-stone-900">{guest.origin}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-orange-100 pb-2">
+                    <span className="text-stone-500">Waktu Check-In:</span>
+                    <span className="font-semibold text-stone-900">{guest.time}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-orange-100 pb-2">
+                    <span className="text-stone-500">Lokasi Petugas:</span>
+                    <span className="font-semibold text-orange-700">{guest.checkedInBy}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-orange-100 pb-2">
+                    <span className="text-stone-500">Titipan Amplop:</span>
+                    <span className="font-bold text-orange-700">
+                      {guest.hasEnvelope ? formatRupiah(guest.envelopeNominal) : 'Tidak ada'}
+                      {guest.envelopeMethod ? ` (${guest.envelopeMethod.toUpperCase()})` : ''}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-stone-500">Kado Fisik:</span>
+                    <span className="font-semibold text-rose-800">
+                      {guest.hasGift ? guest.giftDescription || 'Souvenir' : 'Tidak ada'}
+                      {guest.giftShelf ? ` • Rak ${guest.giftShelf}` : ''}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Doa & Ucapan */}
+                {guest.prayerWish && (
+                  <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/60 space-y-1">
+                    <span className="text-[10px] font-bold text-orange-800 uppercase tracking-wider block">
+                      Doa &amp; Ucapan Pengantin:
+                    </span>
+                    <p className="font-body text-xs italic text-stone-700 leading-relaxed">
+                      "{guest.prayerWish}"
+                    </p>
                   </div>
                 )}
-
-                <div>
-                  <p className="font-headline text-[14px] font-bold text-[#775a19]">
-                    TOKEN: #SOUV-{guest.id.toUpperCase()}
-                  </p>
-                  <p className="text-[10px] text-[#7f7667]">
-                    Tunjukkan kupon ini ke booth souvenir di pintu keluar foyer.
-                  </p>
-                </div>
               </div>
 
-              {/* Delete Guest Confirmation Section */}
-              {showDeleteConfirm ? (
-                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-center space-y-2">
-                  <p className="text-[11.5px] text-red-800 font-semibold">
-                    Yakin ingin menghapus catatan kehadiran tamu ini?
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <button
-                      onClick={handleDelete}
-                      className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs font-bold shadow-xs"
-                    >
-                      Hapus Sekarang
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="px-3 py-1 bg-white text-gray-700 rounded-lg text-xs border border-gray-300"
-                    >
-                      Batal
-                    </button>
+              {/* Right Column on Desktop: Souvenir Coupon & Actions (md:col-span-5) */}
+              <div className="md:col-span-5 space-y-3">
+                {/* Authentic Souvenir Token Voucher with Live Generated QR Code */}
+                <div
+                  id="souvenir-slip"
+                  className="p-3.5 rounded-2xl border border-dashed border-orange-300 bg-orange-50/60 text-center space-y-2.5 shadow-xs"
+                >
+                  <div className="text-[11px] text-orange-800 uppercase font-bold tracking-wider">
+                    Kupon Souvenir &amp; Penukaran
+                  </div>
+
+                  {qrCodeUrl ? (
+                    <div className="flex justify-center">
+                      <img
+                        src={qrCodeUrl}
+                        alt="QR Souvenir"
+                        className="w-28 h-28 sm:w-32 sm:h-32 object-contain rounded-xl p-1.5 bg-white border border-orange-200 shadow-xs"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-28 h-28 sm:w-32 sm:h-32 mx-auto bg-white border border-orange-200 rounded-xl flex items-center justify-center text-xs text-stone-400">
+                      Membuat QR...
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="font-headline text-sm font-bold text-orange-700">
+                      TOKEN: #SOUV-{guest.id.toUpperCase()}
+                    </p>
+                    <p className="text-[10.5px] text-stone-500 leading-tight mt-0.5">
+                      Tunjukkan kupon ini ke booth souvenir di pintu keluar foyer.
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-between text-[11px] pt-1">
-                  <button
-                    onClick={handleSendWhatsAppConfirmation}
-                    className="text-emerald-700 font-bold flex items-center gap-1 hover:underline"
-                  >
-                    <span className="material-symbols-outlined text-sm">share</span>
-                    Kirim Kupon via WhatsApp
-                  </button>
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="text-red-600 hover:underline flex items-center gap-0.5"
-                  >
-                    <span className="material-symbols-outlined text-sm">delete</span>
-                    Hapus Tamu
-                  </button>
-                </div>
-              )}
-            </>
+
+                {/* Delete Guest Confirmation Section */}
+                {showDeleteConfirm ? (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-2">
+                    <p className="text-xs text-rose-800 font-semibold">
+                      Yakin ingin menghapus catatan kehadiran tamu ini?
+                    </p>
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={handleDelete}
+                        className="px-3 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold shadow-xs active:scale-95"
+                      >
+                        Hapus Sekarang
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="px-3 py-1.5 bg-white text-stone-700 rounded-lg text-xs border border-stone-200 hover:bg-stone-50"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <button
+                      onClick={handleSendWhatsAppConfirmation}
+                      className="text-emerald-700 font-bold flex items-center gap-1 hover:underline"
+                    >
+                      <span className="material-symbols-outlined text-sm">share</span>
+                      WhatsApp Kupon
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="text-rose-600 hover:underline flex items-center gap-0.5 font-medium"
+                    >
+                      <span className="material-symbols-outlined text-sm">delete</span>
+                      Hapus
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="p-3 border-t border-[#e4e1ea] bg-[#fbf8ff] grid grid-cols-2 gap-2">
+        <div className="p-3.5 sm:p-4 border-t border-orange-200/60 bg-orange-50/40 grid grid-cols-2 gap-3">
           <button
             onClick={handlePrint}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#efecf5] hover:bg-[#eae7ef] text-[#1b1b21] font-body text-[12px] font-bold flex items-center justify-center gap-1.5 transition-transform active:scale-98"
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-orange-50 text-stone-900 border border-orange-200 font-body text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-transform active:scale-98 shadow-xs"
           >
-            <span className="material-symbols-outlined text-base">print</span>
+            <span className="material-symbols-outlined text-base text-orange-600">print</span>
             <span>Cetak Kupon</span>
           </button>
           <button
             onClick={onClose}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#775a19] text-white font-body text-[12px] font-bold flex items-center justify-center active:scale-98"
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-body text-xs sm:text-sm font-bold flex items-center justify-center active:scale-98 shadow-md"
           >
             Tutup
           </button>

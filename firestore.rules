@@ -33,6 +33,11 @@ service cloud.firestore {
              data.timestamp is number;
     }
 
+    // Test connection endpoint for testFirestoreConnection()
+    match /test/{docId} {
+      allow read: if true;
+    }
+
     // User profile documents
     match /users/{userId} {
       // Anyone can read basic wedding info for RSVP form, owner can read all

@@ -17,6 +17,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
 }) => {
   // Form state
   const [name, setName] = useState('');
+  const [gender, setGender] = useState<'pria' | 'wanita'>('pria');
   const [phone, setPhone] = useState('');
   const [relation, setRelation] = useState('Sahabat Mempelai');
   const [attendance, setAttendance] = useState<'hadir' | 'ragu' | 'tidak_hadir'>('hadir');
@@ -123,7 +124,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
     const newGuest: Guest = {
       id: `rsvp-${Date.now()}`,
       name: name.trim(),
-      gender: 'pria',
+      gender,
       origin: relation,
       category: relation.includes('VIP') ? 'VIP' : relation.includes('Keluarga') ? 'Keluarga' : 'Reguler',
       time: timeFormatted,
@@ -135,9 +136,12 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
       giftDescription: hasGift ? giftDescription.trim() : undefined,
       giftShelf: hasGift ? 'R-RSVP' : undefined,
       prayerWish: prayerWish.trim() || undefined,
-      checkedInBy: 'RSVP Mandiri (Mobile)',
+      checkedInBy: 'RSVP Mandiri (Online)',
       isVerified: true,
       paxCount: attendance === 'tidak_hadir' ? 0 : paxCount,
+      phone: phone.trim() || undefined,
+      rsvpStatus: attendance,
+      isRsvp: true,
     };
 
     onSubmitRSVP(newGuest);
@@ -147,6 +151,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
   const handleResetForm = () => {
     setSubmittedGuest(null);
     setName('');
+    setGender('pria');
     setPhone('');
     setPrayerWish('');
     setGiveEnvelope(false);
@@ -177,11 +182,11 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in">
-      <div className="bg-white text-[#1b1b21] w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border border-[#e4e1ea] my-auto flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 bg-stone-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in">
+      <div className="glass-card bg-white/95 text-stone-900 w-full max-w-lg md:max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-orange-200 my-auto flex flex-col max-h-[92vh]">
         
         {/* Header Elegance */}
-        <div className="relative bg-gradient-to-br from-[#261900] via-[#473600] to-[#775a19] text-white p-5 text-center shrink-0">
+        <div className="relative bg-gradient-to-br from-stone-900 via-orange-950 to-stone-900 text-white p-5 sm:p-6 text-center shrink-0 border-b border-orange-500/20">
           <button
             type="button"
             onClick={handleResetForm}
@@ -190,108 +195,108 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
 
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-[#ffdea5]/40 mb-2">
-            <span className="font-headline text-[15px] font-bold text-[#ffdea5]">K &amp; C</span>
+          <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-orange-500/20 border border-orange-400/50 mb-2 shadow-xs">
+            <span className="font-headline text-base font-bold text-orange-300">K &amp; C</span>
           </div>
 
-          <h2 className="font-headline text-[19px] sm:text-[21px] font-semibold tracking-tight text-[#ffdea5] leading-tight">
+          <h2 className="font-headline text-xl sm:text-2xl font-bold tracking-tight text-orange-100 leading-tight">
             The Wedding of Kevin &amp; Clarissa
           </h2>
-          <p className="font-body text-[11.5px] text-white/80 mt-1">
+          <p className="font-body text-xs text-orange-200/80 mt-1">
             Minggu, 20 September 2026 • Grand Ballroom Hotel Mulia
           </p>
 
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 border border-white/15 text-[11px] font-medium text-[#ffe088]">
-            <span className="material-symbols-outlined text-sm">edit_note</span>
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-orange-400/30 text-xs font-semibold text-orange-200">
+            <span className="material-symbols-outlined text-sm text-orange-400">edit_note</span>
             <span>Form RSVP &amp; Buku Tamu Mandiri</span>
           </div>
         </div>
 
         {/* Modal Body Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 font-body text-[13px]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 font-body text-xs sm:text-sm">
           
           {/* SUCCESS SCREEN / E-PASS TICKET */}
           {submittedGuest ? (
             <div className="flex flex-col items-center text-center space-y-4 py-2 animate-in zoom-in-95 duration-200">
-              <div className="w-12 h-12 rounded-full bg-[#ffdea5] text-[#261900] flex items-center justify-center shadow-md">
-                <span className="material-symbols-outlined text-3xl fill-1">check_circle</span>
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 text-white flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <span className="material-symbols-outlined text-3xl">check_circle</span>
               </div>
 
               <div>
-                <h3 className="font-headline text-[18px] font-bold text-[#1b1b21]">
+                <h3 className="font-headline text-xl font-bold text-stone-900">
                   Konfirmasi RSVP Berhasil!
                 </h3>
-                <p className="text-[12px] text-[#7f7667] mt-1 max-w-xs mx-auto">
+                <p className="text-xs text-stone-600 mt-1 max-w-sm mx-auto">
                   Terima kasih atas doa dan konfirmasi kehadiran Anda di hari bahagia Kevin &amp; Clarissa.
                 </p>
               </div>
 
               {/* Digital Pass / E-Ticket Card */}
-              <div className="w-full bg-[#fdfbf7] rounded-2xl p-4 border border-[#e9c176]/80 shadow-md relative overflow-hidden text-left space-y-3">
-                <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-[#ffdea5]/30 pointer-events-none"></div>
+              <div className="w-full max-w-md bg-gradient-to-br from-orange-50/90 to-amber-50/50 rounded-2xl p-4 sm:p-5 border border-orange-200 shadow-md relative overflow-hidden text-left space-y-3">
+                <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-orange-400/10 pointer-events-none"></div>
 
-                <div className="flex items-center justify-between border-b border-[#e9c176]/40 pb-2.5">
+                <div className="flex items-center justify-between border-b border-orange-200 pb-2.5">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-[#775a19]">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-orange-800">
                       E-Pass &amp; Kupon Souvenir
                     </span>
-                    <span className="font-headline text-[15px] font-bold text-[#1b1b21]">
+                    <span className="font-headline text-base font-bold text-stone-900">
                       {submittedGuest.name}
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-[#775a19] text-white text-[10.5px] font-bold">
+                  <span className="px-2.5 py-1 rounded-full bg-orange-500 text-white text-xs font-bold shadow-2xs">
                     {attendance === 'hadir' ? `${submittedGuest.paxCount} Orang` : 'Tercatat'}
                   </span>
                 </div>
 
                 {/* QR Code Canvas / Image */}
-                <div className="flex flex-col items-center justify-center p-3 bg-white rounded-xl border border-[#e4e1ea]">
+                <div className="flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-orange-200/80 shadow-xs">
                   {ticketQrUrl ? (
                     <img
                       src={ticketQrUrl}
                       alt="QR Tiket Tamu"
-                      className="w-36 h-36 object-contain"
+                      className="w-40 h-40 object-contain"
                     />
                   ) : (
-                    <div className="w-36 h-36 flex items-center justify-center text-gray-400">
-                      <span className="material-symbols-outlined animate-spin">sync</span>
+                    <div className="w-40 h-40 flex items-center justify-center text-gray-400">
+                      <span className="material-symbols-outlined animate-spin text-3xl text-orange-500">sync</span>
                     </div>
                   )}
-                  <span className="font-mono text-[11px] font-bold text-[#775a19] tracking-wider mt-1.5">
+                  <span className="font-mono text-xs font-bold text-orange-800 tracking-wider mt-2">
                     #SOUV-{submittedGuest.id.slice(-6).toUpperCase()}
                   </span>
-                  <span className="text-[10px] text-[#7f7667] text-center mt-0.5">
+                  <span className="text-[11px] text-stone-500 text-center mt-0.5">
                     Tunjukkan kode QR ini kepada petugas di meja souvenir
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
                   <div>
-                    <span className="text-[#7f7667] block">Waktu Check-In:</span>
-                    <span className="font-bold text-[#1b1b21]">{submittedGuest.time}</span>
+                    <span className="text-stone-500 block text-[11px]">Waktu Check-In:</span>
+                    <span className="font-bold text-stone-900">{submittedGuest.time}</span>
                   </div>
                   <div>
-                    <span className="text-[#7f7667] block">Status:</span>
+                    <span className="text-stone-500 block text-[11px]">Status:</span>
                     <span className="font-bold text-emerald-700">Terkonfirmasi Hadir</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons for Guest */}
-              <div className="w-full space-y-2 pt-2">
+              <div className="w-full max-w-md space-y-2 pt-2">
                 <button
                   type="button"
                   onClick={handleShareToWhatsApp}
-                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-98"
+                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-transform active:scale-98"
                 >
-                  <span className="material-symbols-outlined text-[18px]">share</span>
+                  <span className="material-symbols-outlined text-lg">share</span>
                   <span>Simpan E-Tiket ke WhatsApp</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#775a19] text-white font-bold text-[13px] shadow-sm active:scale-98 transition-transform"
+                  className="w-full py-3 px-4 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs sm:text-sm shadow-sm active:scale-98 transition-transform"
                 >
                   Selesai &amp; Kembali ke Halaman Utama
                 </button>
@@ -302,79 +307,116 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               
               {/* Salutation / Intro Note */}
-              <div className="p-3 bg-[#fdfaf3] border border-[#e9c176]/50 rounded-xl text-[12px] text-[#4e4639] leading-relaxed">
+              <div className="p-3 sm:p-3.5 bg-orange-50/70 border border-orange-200 rounded-xl text-xs text-orange-950 leading-relaxed">
                 Tanpa mengurangi rasa hormat, mohon berkenan mengonfirmasi kehadiran Anda demi kenyamanan dan kelancaran acara resepsi.
               </div>
 
-              {/* Nama Tamu */}
-              <div className="space-y-1">
-                <label className="block font-semibold text-[#1b1b21] text-[12.5px]">
-                  Nama Tamu / Keluarga <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#7f7667] text-[18px]">
-                    person
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Bpk. Bambang Sutrisno &amp; Istri"
-                    className="w-full pl-9 pr-3 py-2 bg-[#f5f2fb] rounded-xl border border-[#e4e1ea] focus:bg-white focus:ring-2 focus:ring-[#775a19]/40 focus:border-[#775a19] outline-none text-[13px]"
-                  />
+              {/* Responsive 2-column grid for Name and Gender */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Nama Tamu */}
+                <div className="space-y-1">
+                  <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                    Nama Tamu / Keluarga <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-lg">
+                      person
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Contoh: Bpk. Bambang Sutrisno &amp; Istri"
+                      className="w-full pl-9 pr-3 py-2 bg-orange-50/40 rounded-xl border border-orange-200 focus:bg-white focus:ring-2 focus:ring-orange-400/40 focus:border-orange-500 outline-none text-xs sm:text-sm text-stone-900 placeholder:text-stone-400"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Nomor WhatsApp */}
-              <div className="space-y-1">
-                <label className="block font-semibold text-[#1b1b21] text-[12.5px]">
-                  Nomor WhatsApp <span className="text-[11px] text-[#7f7667] font-normal">(Untuk kirim kupon souvenir)</span>
-                </label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-2.5 text-[#7f7667] text-[18px]">
-                    chat
-                  </span>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Contoh: 081234567890"
-                    className="w-full pl-9 pr-3 py-2 bg-[#f5f2fb] rounded-xl border border-[#e4e1ea] focus:bg-white focus:ring-2 focus:ring-[#775a19]/40 focus:border-[#775a19] outline-none text-[13px]"
-                  />
-                </div>
-              </div>
-
-              {/* Relasi / Kategori Tamu */}
-              <div className="space-y-1.5">
-                <label className="block font-semibold text-[#1b1b21] text-[12.5px]">
-                  Hubungan / Relasi
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {relationOptions.map((opt) => (
+                {/* Pilihan Gender */}
+                <div className="space-y-1">
+                  <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                    Jenis Kelamin
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
                     <button
-                      key={opt}
                       type="button"
                       onClick={() => {
                         sound.playTap();
-                        setRelation(opt);
+                        setGender('pria');
                       }}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
-                        relation === opt
-                          ? 'bg-[#775a19] text-white shadow-xs'
-                          : 'bg-[#efecf5] text-[#4e4639] hover:bg-[#e4e1ea]'
+                      className={`py-2 px-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                        gender === 'pria'
+                          ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                          : 'bg-orange-50/40 text-stone-600 border-orange-200 hover:bg-orange-100/50'
                       }`}
                     >
-                      {opt}
+                      <span className="material-symbols-outlined text-base">man</span>
+                      <span>Pria / Bapak</span>
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playTap();
+                        setGender('wanita');
+                      }}
+                      className={`py-2 px-3 rounded-xl border text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                        gender === 'wanita'
+                          ? 'bg-rose-500 text-white border-rose-500 shadow-xs'
+                          : 'bg-orange-50/40 text-stone-600 border-orange-200 hover:bg-orange-100/50'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-base">woman</span>
+                      <span>Wanita / Ibu</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Responsive 2-column grid for WhatsApp and Attendance */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Nomor WhatsApp */}
+                <div className="space-y-1">
+                  <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                    Nomor WhatsApp <span className="text-xs text-stone-500 font-normal">(Untuk kupon)</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-lg">
+                      chat
+                    </span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Contoh: 081234567890"
+                      className="w-full pl-9 pr-3 py-2 bg-orange-50/40 rounded-xl border border-orange-200 focus:bg-white focus:ring-2 focus:ring-orange-400/40 focus:border-orange-500 outline-none text-xs sm:text-sm text-stone-900 placeholder:text-stone-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Relasi / Kategori Tamu */}
+                <div className="space-y-1">
+                  <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                    Hubungan / Relasi
+                  </label>
+                  <select
+                    value={relation}
+                    onChange={(e) => setRelation(e.target.value)}
+                    className="w-full px-3 py-2 bg-orange-50/40 rounded-xl border border-orange-200 focus:bg-white focus:ring-2 focus:ring-orange-400/40 focus:border-orange-500 outline-none text-xs sm:text-sm text-stone-900"
+                  >
+                    {relationOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               {/* Konfirmasi Kehadiran */}
               <div className="space-y-2 pt-1">
-                <label className="block font-semibold text-[#1b1b21] text-[12.5px]">
-                  Konfirmasi Kehadiran <span className="text-red-500">*</span>
+                <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                  Konfirmasi Kehadiran <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
@@ -383,13 +425,13 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                       sound.playTap();
                       setAttendance('hadir');
                     }}
-                    className={`py-2 px-1 rounded-xl text-[11.5px] font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
+                    className={`py-2 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
                       attendance === 'hadir'
-                        ? 'bg-[#ffdea5] text-[#261900] border-[#775a19] shadow-xs'
-                        : 'bg-white text-[#7f7667] border-[#e4e1ea] hover:bg-[#f5f2fb]'
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-500 shadow-md'
+                        : 'bg-white text-stone-600 border-orange-200 hover:bg-orange-50'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span className="material-symbols-outlined text-lg">verified</span>
                     <span>Pasti Hadir</span>
                   </button>
 
@@ -399,13 +441,13 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                       sound.playTap();
                       setAttendance('ragu');
                     }}
-                    className={`py-2 px-1 rounded-xl text-[11.5px] font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
+                    className={`py-2 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
                       attendance === 'ragu'
                         ? 'bg-amber-100 text-amber-900 border-amber-500 shadow-xs'
-                        : 'bg-white text-[#7f7667] border-[#e4e1ea] hover:bg-[#f5f2fb]'
+                        : 'bg-white text-stone-600 border-orange-200 hover:bg-orange-50'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">help</span>
+                    <span className="material-symbols-outlined text-lg">help</span>
                     <span>Masih Ragu</span>
                   </button>
 
@@ -415,13 +457,13 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                       sound.playTap();
                       setAttendance('tidak_hadir');
                     }}
-                    className={`py-2 px-1 rounded-xl text-[11.5px] font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
+                    className={`py-2 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col items-center justify-center gap-1 border transition-all ${
                       attendance === 'tidak_hadir'
                         ? 'bg-rose-100 text-rose-900 border-rose-400 shadow-xs'
-                        : 'bg-white text-[#7f7667] border-[#e4e1ea] hover:bg-[#f5f2fb]'
+                        : 'bg-white text-stone-600 border-orange-200 hover:bg-orange-50'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">cancel</span>
+                    <span className="material-symbols-outlined text-lg">cancel</span>
                     <span>Tidak Hadir</span>
                   </button>
                 </div>
@@ -429,8 +471,8 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
 
               {/* Jumlah Pax (Jika hadir atau ragu) */}
               {attendance !== 'tidak_hadir' && (
-                <div className="space-y-1.5 bg-[#f5f2fb] p-3 rounded-xl border border-[#e4e1ea]">
-                  <label className="block font-semibold text-[#1b1b21] text-[12px]">
+                <div className="space-y-1.5 bg-orange-50/50 p-3 rounded-xl border border-orange-200">
+                  <label className="block font-semibold text-stone-900 text-xs">
                     Jumlah Orang yang Hadir
                   </label>
                   <div className="flex items-center gap-2">
@@ -444,8 +486,8 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                         }}
                         className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
                           paxCount === num
-                            ? 'bg-[#775a19] text-white shadow-xs'
-                            : 'bg-white text-[#4e4639] border border-[#e4e1ea]'
+                            ? 'bg-orange-500 text-white shadow-xs'
+                            : 'bg-white text-stone-700 border border-orange-200'
                         }`}
                       >
                         {num === 4 ? '4+ Orang' : `${num} Orang`}
@@ -457,7 +499,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
 
               {/* Ucapan & Doa Restu */}
               <div className="space-y-1.5">
-                <label className="block font-semibold text-[#1b1b21] text-[12.5px]">
+                <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
                   Ucapan &amp; Doa Restu untuk Kedua Mempelai
                 </label>
                 <textarea
@@ -465,17 +507,17 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                   value={prayerWish}
                   onChange={(e) => setPrayerWish(e.target.value)}
                   placeholder="Tuliskan ucapan selamat atau doa restu..."
-                  className="w-full p-2.5 bg-[#f5f2fb] rounded-xl border border-[#e4e1ea] focus:bg-white focus:ring-2 focus:ring-[#775a19]/40 outline-none text-[12.5px]"
+                  className="w-full p-2.5 bg-orange-50/40 rounded-xl border border-orange-200 focus:bg-white focus:ring-2 focus:ring-orange-400/40 outline-none text-xs sm:text-sm text-stone-900 placeholder:text-stone-400"
                 ></textarea>
 
                 {/* Quick wish templates */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                   {quickWishes.map((w, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setPrayerWish(w)}
-                      className="text-[10px] text-[#775a19] bg-[#ffdea5]/40 hover:bg-[#ffdea5] px-2 py-0.5 rounded-md shrink-0 truncate max-w-[200px]"
+                      className="text-[11px] text-orange-900 bg-orange-100/70 hover:bg-orange-200 px-2.5 py-1 rounded-lg shrink-0 truncate max-w-[220px] transition-colors"
                     >
                       "{w.slice(0, 30)}..."
                     </button>
@@ -484,20 +526,20 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
               </div>
 
               {/* Tanda Kasih & Amplop Digital (Cashless) */}
-              <div className="border border-[#e4e1ea] rounded-xl overflow-hidden bg-white">
+              <div className="border border-orange-200 rounded-xl overflow-hidden bg-white shadow-2xs">
                 <div
                   onClick={() => setGiveEnvelope(!giveEnvelope)}
-                  className="p-3 bg-[#fdfaf3] flex items-center justify-between cursor-pointer select-none"
+                  className="p-3 sm:p-3.5 bg-orange-50/60 flex items-center justify-between cursor-pointer select-none"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[#775a19] text-xl">
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-orange-600 text-xl">
                       redeem
                     </span>
                     <div className="flex flex-col">
-                      <span className="font-bold text-[12.5px] text-[#1b1b21]">
+                      <span className="font-bold text-xs sm:text-sm text-stone-900">
                         Kirim Tanda Kasih / Amplop Digital
                       </span>
-                      <span className="text-[10.5px] text-[#7f7667]">
+                      <span className="text-[11px] text-stone-500">
                         Titipan amplop via QRIS atau Transfer Bank Mempelai
                       </span>
                     </div>
@@ -506,104 +548,104 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                     type="checkbox"
                     checked={giveEnvelope}
                     onChange={(e) => setGiveEnvelope(e.target.checked)}
-                    className="w-4 h-4 accent-[#775a19] rounded cursor-pointer"
+                    className="w-4 h-4 accent-orange-600 rounded cursor-pointer"
                   />
                 </div>
 
                 {giveEnvelope && (
-                  <div className="p-3 space-y-3 bg-white border-t border-[#e4e1ea]">
+                  <div className="p-3 sm:p-4 space-y-3 bg-white border-t border-orange-200">
                     {/* Method Selector */}
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setEnvelopeMethod('qris')}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border ${
+                        className={`py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
                           envelopeMethod === 'qris'
-                            ? 'bg-[#775a19] text-white border-[#775a19]'
-                            : 'bg-[#f5f2fb] text-[#4e4639] border-[#e4e1ea]'
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                            : 'bg-orange-50/40 text-stone-700 border-orange-200'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-sm">qr_code_2</span>
+                        <span className="material-symbols-outlined text-base">qr_code_2</span>
                         <span>QRIS Pay</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setEnvelopeMethod('transfer')}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border ${
+                        className={`py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
                           envelopeMethod === 'transfer'
-                            ? 'bg-[#775a19] text-white border-[#775a19]'
-                            : 'bg-[#f5f2fb] text-[#4e4639] border-[#e4e1ea]'
+                            ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                            : 'bg-orange-50/40 text-stone-700 border-orange-200'
                         }`}
                       >
-                        <span className="material-symbols-outlined text-sm">account_balance</span>
+                        <span className="material-symbols-outlined text-base">account_balance</span>
                         <span>Transfer Bank</span>
                       </button>
                     </div>
 
                     {/* QRIS Display or Bank Transfer Details */}
                     {envelopeMethod === 'qris' ? (
-                      <div className="p-3 bg-[#f5f2fb] rounded-xl flex flex-col items-center text-center space-y-1.5 border border-[#e4e1ea]">
-                        <div className="bg-white p-2 rounded-lg shadow-xs border border-gray-200">
+                      <div className="p-4 bg-orange-50/40 rounded-xl flex flex-col items-center text-center space-y-2 border border-orange-200">
+                        <div className="bg-white p-3 rounded-xl shadow-xs border border-orange-200/80">
                           <img
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=00020101021126580016ID.CO.QRIS.WWW0118936009988210988210214882109882190015204581253033605802ID5914KEVIN_CLARISSA6007JAKARTA6304E8A2"
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=00020101021126580016ID.CO.QRIS.WWW0118936009988210988210214882109882190015204581253033605802ID5914KEVIN_CLARISSA6007JAKARTA6304E8A2"
                             alt="QRIS Wedding Kevin & Clarissa"
-                            className="w-32 h-32 object-contain"
+                            className="w-36 h-36 object-contain"
                           />
                         </div>
-                        <span className="text-[11px] font-bold text-[#1b1b21]">
+                        <span className="text-xs font-bold text-stone-900">
                           QRIS Wedding Kevin &amp; Clarissa
                         </span>
-                        <span className="text-[10px] text-[#7f7667]">
+                        <span className="text-[11px] text-stone-500 max-w-xs">
                           Bisa di-scan menggunakan GoPay, OVO, BCA Mobile, Livin Mandiri, atau Dana
                         </span>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {/* Rekening BCA */}
-                        <div className="p-2.5 bg-[#f5f2fb] rounded-xl flex items-center justify-between border border-[#e4e1ea]">
+                        <div className="p-3 bg-orange-50/40 rounded-xl flex items-center justify-between border border-orange-200">
                           <div>
-                            <span className="text-[10px] font-bold text-[#775a19] block uppercase">
+                            <span className="text-[10px] font-bold text-orange-800 block uppercase tracking-wide">
                               Bank Central Asia (BCA)
                             </span>
-                            <span className="font-mono text-[13px] font-bold text-[#1b1b21]">
+                            <span className="font-mono text-sm font-bold text-stone-900">
                               8821 0988 21
                             </span>
-                            <span className="text-[10px] text-[#7f7667] block">a/n Kevin Pratama</span>
+                            <span className="text-[11px] text-stone-500 block">a/n Kevin Pratama</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleCopyAccount('8821098821', 'BCA')}
-                            className="px-2.5 py-1 bg-white border border-[#e4e1ea] hover:bg-[#efecf5] rounded-lg text-[11px] font-bold text-[#775a19] flex items-center gap-1"
+                            className="px-3 py-1.5 bg-white border border-orange-200 hover:bg-orange-50 rounded-lg text-xs font-bold text-orange-800 flex items-center gap-1 transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xs">content_copy</span>
+                            <span className="material-symbols-outlined text-sm">content_copy</span>
                             Salin
                           </button>
                         </div>
 
                         {/* Rekening Mandiri */}
-                        <div className="p-2.5 bg-[#f5f2fb] rounded-xl flex items-center justify-between border border-[#e4e1ea]">
+                        <div className="p-3 bg-orange-50/40 rounded-xl flex items-center justify-between border border-orange-200">
                           <div>
-                            <span className="text-[10px] font-bold text-[#92484f] block uppercase">
+                            <span className="text-[10px] font-bold text-orange-800 block uppercase tracking-wide">
                               Bank Mandiri
                             </span>
-                            <span className="font-mono text-[13px] font-bold text-[#1b1b21]">
+                            <span className="font-mono text-sm font-bold text-stone-900">
                               137 00 1928 333
                             </span>
-                            <span className="text-[10px] text-[#7f7667] block">a/n Clarissa Wijaya</span>
+                            <span className="text-[11px] text-stone-500 block">a/n Clarissa Wijaya</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleCopyAccount('137001928333', 'Mandiri')}
-                            className="px-2.5 py-1 bg-white border border-[#e4e1ea] hover:bg-[#efecf5] rounded-lg text-[11px] font-bold text-[#92484f] flex items-center gap-1"
+                            className="px-3 py-1.5 bg-white border border-orange-200 hover:bg-orange-50 rounded-lg text-xs font-bold text-orange-800 flex items-center gap-1 transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xs">content_copy</span>
+                            <span className="material-symbols-outlined text-sm">content_copy</span>
                             Salin
                           </button>
                         </div>
 
                         {showCopyFeedback && (
-                          <div className="text-[11px] text-emerald-700 bg-emerald-50 p-1.5 rounded text-center font-semibold">
+                          <div className="text-xs text-emerald-700 bg-emerald-50 p-2 rounded-lg text-center font-semibold border border-emerald-200">
                             Nomor rekening {copiedBank} berhasil disalin!
                           </div>
                         )}
@@ -612,7 +654,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
 
                     {/* Nominal Selector */}
                     <div className="space-y-1.5 pt-1">
-                      <label className="block text-[11.5px] font-semibold text-[#1b1b21]">
+                      <label className="block text-xs font-semibold text-stone-900">
                         Nominal Tanda Kasih (Rp)
                       </label>
                       <input
@@ -622,15 +664,15 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                           const raw = parseRupiah(e.target.value);
                           setNominal(raw === 0 ? '' : formatRupiah(raw));
                         }}
-                        className="w-full px-3 py-1.5 bg-[#f5f2fb] rounded-lg border border-[#e4e1ea] text-[13px] font-bold text-[#775a19]"
+                        className="w-full px-3 py-2 bg-orange-50/40 rounded-xl border border-orange-200 text-sm font-bold text-orange-700 focus:bg-white focus:ring-2 focus:ring-orange-400 outline-none"
                       />
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         {[200000, 500000, 1000000].map((amt) => (
                           <button
                             key={amt}
                             type="button"
                             onClick={() => setNominal(formatRupiah(amt))}
-                            className="text-[10.5px] bg-[#efecf5] hover:bg-[#e4e1ea] text-[#4e4639] font-semibold px-2 py-0.5 rounded"
+                            className="text-xs bg-orange-100/60 hover:bg-orange-200 text-orange-950 font-semibold px-2.5 py-1 rounded-lg transition-colors"
                           >
                             Rp {formatRupiah(amt)}
                           </button>
@@ -642,13 +684,13 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
               </div>
 
               {/* Kado Fisik Checkbox */}
-              <div className="p-3 bg-[#f5f2fb] rounded-xl border border-[#e4e1ea] space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-[#1b1b21]">
+              <div className="p-3 sm:p-3.5 bg-orange-50/40 rounded-xl border border-orange-200 space-y-2">
+                <label className="flex items-center gap-2 cursor-pointer text-xs sm:text-sm font-semibold text-stone-900">
                   <input
                     type="checkbox"
                     checked={hasGift}
                     onChange={(e) => setHasGift(e.target.checked)}
-                    className="w-4 h-4 accent-[#775a19] rounded"
+                    className="w-4 h-4 accent-orange-600 rounded"
                   />
                   <span>Membawa Bingkisan / Kado Fisik Langsung</span>
                 </label>
@@ -659,7 +701,7 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
                     value={giftDescription}
                     onChange={(e) => setGiftDescription(e.target.value)}
                     placeholder="Contoh: Kado Peralatan Dapur / Tea Set"
-                    className="w-full px-3 py-1.5 bg-white rounded-lg border border-[#e4e1ea] text-[12px]"
+                    className="w-full px-3 py-2 bg-white rounded-xl border border-orange-200 text-xs sm:text-sm focus:ring-2 focus:ring-orange-400 outline-none text-stone-900"
                   />
                 )}
               </div>
@@ -667,13 +709,13 @@ export const RSVPModal: React.FC<RSVPModalProps> = ({
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#775a19] to-[#634b15] hover:from-[#634b15] hover:to-[#503b0f] text-white font-bold text-[13.5px] shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-transform"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
               >
-                <span className="material-symbols-outlined text-[19px]">send</span>
+                <span className="material-symbols-outlined text-xl">send</span>
                 <span>Kirim RSVP &amp; Dapatkan Kupon Souvenir</span>
               </button>
 
-              <p className="text-[10.5px] text-[#7f7667] text-center">
+              <p className="text-[11px] text-stone-500 text-center">
                 Data akan otomatis tercatat ke buku resepsi meja tamu.
               </p>
             </form>
