@@ -23,6 +23,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       icon: 'person_add',
     },
     {
+      id: 'kelola-souvenir' as TabType,
+      label: 'Souvenir',
+      icon: 'featured_seasonal_and_gifts',
+    },
+    {
       id: 'galeri-wedding' as TabType,
       label: 'Galeri',
       icon: 'photo_library',
@@ -41,7 +46,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/85 backdrop-blur-2xl border-t border-orange-100/80 shadow-[0_-4px_24px_rgba(234,88,12,0.08)] no-print md:hidden">
-      <div className="max-w-md mx-auto grid grid-cols-5 items-center h-16 px-1">
+      <div className="max-w-lg mx-auto grid grid-cols-6 items-center h-16 px-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (

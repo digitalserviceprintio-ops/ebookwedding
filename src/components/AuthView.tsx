@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { 
   registerWithEmail, 
-  loginWithEmail, 
-  loginDemoAccount 
+  loginWithEmail,
+  resetPasswordForEmail
 } from '../lib/firebase';
 import { sound } from '../utils/sound';
 import { APP_ASSETS } from '../data/initialData';
 
 interface AuthViewProps {
-  onOpenRSVP: () => void;
+  onOpenRSVP?: () => void;
   onLoginSuccess: (user: { uid: string; email: string; displayName?: string }) => void;
 }
 
 export const AuthView: React.FC<AuthViewProps> = ({
-  onOpenRSVP,
   onLoginSuccess,
 }) => {
   const [isRegisterMode, setIsRegisterMode] = useState(true);
@@ -26,11 +25,18 @@ export const AuthView: React.FC<AuthViewProps> = ({
   
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isEmailAlreadyRegistered, setIsEmailAlreadyRegistered] = useState(false);
+  const [isInvalidCredential, setIsInvalidCredential] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccessMsg, setResetSuccessMsg] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setIsEmailAlreadyRegistered(false);
+    setIsInvalidCredential(false);
+    setResetSuccessMsg(null);
     sound.playTap();
 
     if (isRegisterMode && password !== confirmPassword) {
@@ -69,13 +75,37 @@ export const AuthView: React.FC<AuthViewProps> = ({
         });
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
-      if (err.code === 'auth/email-already-in-use') {
-        setErrorMsg('Email ini sudah terdaftar. Silakan beralih ke menu Masuk.');
-      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-        setErrorMsg('Email atau kata sandi tidak sesuai.');
-      } else if (err.code === 'auth/invalid-email') {
-        setErrorMsg('Format email tidak valid.');
+      sound.playError();
+      const code = err?.code || '';
+      const message = String(err?.message || '');
+
+      const isExpected = [
+        'auth/invalid-credential',
+        'auth/wrong-password',
+        'auth/user-not-found',
+        'auth/email-already-in-use',
+        'auth/invalid-email',
+        'auth/weak-password',
+      ].includes(code) || message.includes('invalid-credential') || message.includes('email-already-in-use');
+
+      if (!isExpected) {
+        console.error('Auth error:', err);
+      } else {
+        console.warn('Authentication status:', code || message);
+      }
+
+      if (code === 'auth/email-already-in-use' || message.includes('email-already-in-use')) {
+        setIsEmailAlreadyRegistered(true);
+        setErrorMsg('Email ini sudah terdaftar sebagai akun aktif. Silakan beralih ke halaman Masuk Akun.');
+      } else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || message.includes('invalid-credential')) {
+        setIsInvalidCredential(true);
+        setErrorMsg('Email atau kata sandi tidak sesuai. Periksa kembali atau kirim tautan reset kata sandi.');
+      } else if (code === 'auth/user-not-found') {
+        setErrorMsg('Akun belum terdaftar. Silakan buat akun baru di tab "Daftar Akun Baru".');
+      } else if (code === 'auth/invalid-email') {
+        setErrorMsg('Format email tidak valid. Masukkan alamat email yang benar.');
+      } else if (code === 'auth/weak-password') {
+        setErrorMsg('Kata sandi terlalu pendek/lemah. Gunakan minimal 6 karakter.');
       } else {
         setErrorMsg(err.message || 'Terjadi kendala saat autentikasi. Silakan coba lagi.');
       }
@@ -84,23 +114,25 @@ export const AuthView: React.FC<AuthViewProps> = ({
     }
   };
 
-  const handleDemoLogin = async () => {
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setErrorMsg('Ketik alamat email Anda di kolom di bawah terlebih dahulu.');
+      return;
+    }
     sound.playTap();
-    setLoading(true);
+    setResetLoading(true);
     setErrorMsg(null);
+    setResetSuccessMsg(null);
     try {
-      const user = await loginDemoAccount('Demo Pengantin (Kevin & Clarissa)');
-      sound.playScanSuccess();
-      onLoginSuccess({
-        uid: user.uid,
-        email: user.email || 'demo@wedding.app',
-        displayName: 'Demo Pengantin',
-      });
+      await resetPasswordForEmail(email.trim());
+      sound.playSuccess();
+      setResetSuccessMsg(`Tautan pemulihan kata sandi telah dikirim ke ${email.trim()}. Silakan cek kotak masuk/spam email Anda.`);
     } catch (err: any) {
-      console.error('Demo auth error:', err);
-      setErrorMsg('Gagal masuk akun demo: ' + (err.message || 'Silakan coba daftar manual.'));
+      console.error('Reset password error:', err);
+      sound.playError();
+      setErrorMsg('Gagal mengirim email pemulihan: ' + (err.message || 'Pastikan email sudah terdaftar.'));
     } finally {
-      setLoading(false);
+      setResetLoading(false);
     }
   };
 
@@ -119,18 +151,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
           <h1 className="font-headline text-2xl sm:text-3xl font-bold text-orange-100 tracking-tight">
             EBook Wedding Digital
           </h1>
-          <p className="font-body text-xs sm:text-sm text-orange-200/80 mt-1.5 max-w-sm mx-auto">
-            Buku Tamu &amp; Meja Resepsionis Digital dengan Penyimpanan Cloud Permanen
-          </p>
-
-          <div className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-black/40 border border-orange-400/30 text-xs text-orange-200">
-            <span className="material-symbols-outlined text-sm text-orange-400">cloud_done</span>
-            <span>Data Terisolasi Per-Akun di Firestore</span>
-          </div>
         </div>
 
         {/* Tab Switcher: Daftar vs Masuk */}
-        <div className="p-4 sm:p-6 pb-0">
+        <div className="p-4 sm:p-6 pb-6 sm:pb-8">
           <div className="grid grid-cols-2 p-1.5 bg-orange-50/60 rounded-2xl border border-orange-200 text-xs sm:text-sm font-semibold">
             <button
               type="button"
@@ -171,12 +195,95 @@ export const AuthView: React.FC<AuthViewProps> = ({
         {/* Form Body */}
         <div className="p-5 sm:p-6 space-y-4">
           
-          {errorMsg && (
+          {/* Email Already Registered Notification with 1-Click Switch */}
+          {isEmailAlreadyRegistered && (
+            <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-2xl text-stone-800 text-xs sm:text-sm flex flex-col gap-2.5 shadow-xs animate-in fade-in">
+              <div className="flex items-start gap-2.5">
+                <span className="material-symbols-outlined text-amber-600 text-xl shrink-0 mt-0.5">
+                  info
+                </span>
+                <div className="flex-1">
+                  <p className="font-bold text-amber-950 text-sm">Alamat Email Sudah Terdaftar</p>
+                  <p className="text-stone-600 mt-0.5 leading-relaxed">
+                    Email <span className="font-bold text-stone-900">{email}</span> sudah memiliki akun. Silakan langsung masuk dengan kata sandi Anda.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-1 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playTap();
+                    setIsRegisterMode(false);
+                    setErrorMsg(null);
+                    setIsEmailAlreadyRegistered(false);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-base">login</span>
+                  <span>Beralih ke Masuk Akun</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Invalid Credential Notification with 1-Click Reset or Switch */}
+          {isInvalidCredential && (
+            <div className="p-4 bg-rose-50 border border-rose-200/90 rounded-2xl text-stone-800 text-xs sm:text-sm flex flex-col gap-2.5 shadow-xs animate-in fade-in">
+              <div className="flex items-start gap-2.5">
+                <span className="material-symbols-outlined text-rose-600 text-xl shrink-0 mt-0.5">
+                  lock_person
+                </span>
+                <div className="flex-1">
+                  <p className="font-bold text-rose-950 text-sm">Email atau Kata Sandi Tidak Sesuai</p>
+                  <p className="text-stone-600 mt-0.5 leading-relaxed">
+                    Kombinasi email dan kata sandi yang dimasukkan belum tepat. Anda dapat mengirimkan tautan pemulihan kata sandi ke email atau mendaftar jika belum memiliki akun.
+                  </p>
+                </div>
+              </div>
+              <div className="pt-1 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-sm">mark_email_read</span>
+                  <span>{resetLoading ? 'Mengirim...' : 'Kirim Tautan Reset Kata Sandi'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playTap();
+                    setIsRegisterMode(true);
+                    setErrorMsg(null);
+                    setIsInvalidCredential(false);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 font-semibold text-xs flex items-center gap-1.5 transition-all"
+                >
+                  <span>Daftar Akun Baru</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* General Error Message (if not handled by specific cards) */}
+          {errorMsg && !isEmailAlreadyRegistered && !isInvalidCredential && (
             <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs sm:text-sm flex items-start gap-2.5 animate-in fade-in">
               <span className="material-symbols-outlined text-rose-600 text-lg shrink-0 mt-0.5">
                 error
               </span>
-              <span>{errorMsg}</span>
+              <span className="leading-snug">{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Password Reset Sent Success Banner */}
+          {resetSuccessMsg && (
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs sm:text-sm flex items-start gap-2.5 animate-in fade-in">
+              <span className="material-symbols-outlined text-emerald-600 text-lg shrink-0 mt-0.5">
+                check_circle
+              </span>
+              <span className="leading-snug">{resetSuccessMsg}</span>
             </div>
           )}
 
@@ -256,9 +363,21 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
             {/* Password */}
             <div className="space-y-1">
-              <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
-                Kata Sandi <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block font-semibold text-stone-900 text-xs sm:text-sm">
+                  Kata Sandi <span className="text-rose-500">*</span>
+                </label>
+                {!isRegisterMode && (
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading}
+                    className="text-[11px] text-orange-700 hover:text-orange-900 font-semibold hover:underline"
+                  >
+                    {resetLoading ? 'Mengirim...' : 'Lupa kata sandi?'}
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-lg">
                   lock
@@ -329,44 +448,6 @@ export const AuthView: React.FC<AuthViewProps> = ({
               )}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-orange-200/60"></div>
-            <span className="flex-shrink mx-3 text-xs text-stone-500 font-semibold">
-              atau opsi cepat
-            </span>
-            <div className="flex-grow border-t border-orange-200/60"></div>
-          </div>
-
-          {/* Demo Account Button */}
-          <button
-            type="button"
-            onClick={handleDemoLogin}
-            disabled={loading}
-            className="w-full py-3 px-3 rounded-xl bg-orange-50/70 hover:bg-orange-100 border border-orange-200 text-orange-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors active:scale-98"
-          >
-            <span className="material-symbols-outlined text-lg text-orange-600">bolt</span>
-            <span>Masuk Cepat dengan Akun Demo (1-Klik)</span>
-          </button>
-
-          {/* Guest RSVP Link */}
-          <div className="pt-2 text-center">
-            <button
-              type="button"
-              onClick={onOpenRSVP}
-              className="text-xs sm:text-sm text-orange-700 hover:text-orange-900 hover:underline font-semibold inline-flex items-center gap-1 transition-colors"
-            >
-              <span className="material-symbols-outlined text-base">edit_note</span>
-              <span>Hanya ingin mengisi RSVP Tamu? Buka Formulir RSVP</span>
-            </button>
-          </div>
-
-        </div>
-
-        {/* Footer Note */}
-        <div className="px-6 py-3 bg-orange-50/50 border-t border-orange-200/60 text-center text-xs text-stone-500">
-          Data tamu, foto, dan amplop tersimpan aman &amp; permanen di Firebase Cloud Firestore.
         </div>
 
       </div>

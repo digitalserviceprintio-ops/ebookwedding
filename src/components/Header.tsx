@@ -8,131 +8,164 @@ interface HeaderProps {
   setActiveTab: (tab: TabType) => void;
   onOpenAdminPortal: () => void;
   onOpenQRScan?: () => void;
-  particlesEnabled?: boolean;
-  onToggleParticles?: () => void;
+  onOpenKiosk?: () => void;
+  onToggleMobileMenu?: () => void;
   guestCount?: number;
 }
+
+const TAB_TITLES: Record<TabType, { title: string; subtitle: string; icon: string }> = {
+  'buku-tamu': {
+    title: 'Buku Tamu Digital',
+    subtitle: 'Daftar kehadiran resmi, amplop tunai/QRIS, dan kado',
+    icon: 'menu_book',
+  },
+  'input-tamu': {
+    title: 'Input & Check-In Tamu',
+    subtitle: 'Pencatatan data kehadiran dan pembuatan kupon souvenir',
+    icon: 'person_add',
+  },
+  'kelola-souvenir': {
+    title: 'Kelola & Penukaran Souvenir',
+    subtitle: 'Kontrol stok souvenir, verifikasi kupon token, dan log penukaran live',
+    icon: 'featured_seasonal_and_gifts',
+  },
+  'galeri-wedding': {
+    title: 'Galeri Foto Momen',
+    subtitle: 'Dokumentasi visual kebahagiaan dan live photo booth',
+    icon: 'photo_library',
+  },
+  'laporan-dan-cetak': {
+    title: 'Laporan & Rekapitulasi',
+    subtitle: 'Ringkasan amplop, ekspor data Excel, dan cetak laporan PDF',
+    icon: 'summarize',
+  },
+  'akun-admin': {
+    title: 'Portal Admin & Pengaturan',
+    subtitle: 'Konfigurasi meja resepsionis, akun, dan manajemen database',
+    icon: 'manage_accounts',
+  },
+  'panduan-bantuan': {
+    title: 'Panduan & Bantuan',
+    subtitle: 'Petunjuk lengkap sistem dan kontak bantuan resmi (+6282186371356)',
+    icon: 'support_agent',
+  },
+  'tentang-aplikasi': {
+    title: 'Tentang Aplikasi & Versi',
+    subtitle: 'Aplikasi dikembangkan oleh microdata2r • wedding book v.1.02',
+    icon: 'info',
+  },
+};
 
 export const Header: React.FC<HeaderProps> = ({
   session,
   activeTab,
   setActiveTab,
   onOpenAdminPortal,
-  onOpenQRScan,
-  particlesEnabled = true,
-  onToggleParticles,
+  onToggleMobileMenu,
   guestCount,
 }) => {
   if (activeTab === 'akun-admin') {
-    return null; // The login/admin portal page has its own prominent centered card header
+    return null;
   }
 
-  const desktopNavItems: { id: TabType; label: string; icon: string; badge?: string | number }[] = [
-    { id: 'buku-tamu', label: 'Buku Tamu', icon: 'menu_book', badge: guestCount !== undefined ? `${guestCount}` : undefined },
-    { id: 'input-tamu', label: '+ Input Tamu', icon: 'person_add' },
-    { id: 'galeri-wedding', label: 'Galeri Foto', icon: 'photo_library' },
-    { id: 'laporan-dan-cetak', label: 'Laporan & Rekap', icon: 'summarize' },
-  ];
+  const currentTabInfo = TAB_TITLES[activeTab] || TAB_TITLES['buku-tamu'];
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 bg-white/85 backdrop-blur-2xl shadow-[0_4px_24px_-2px_rgba(234,88,12,0.08)] border-b border-orange-100/80 transition-all">
-      <div className="max-w-7xl mx-auto h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-        {/* Left: Logo & Event Title */}
-        <div 
-          onClick={() => setActiveTab('buku-tamu')}
-          className="flex items-center gap-3 min-w-0 cursor-pointer select-none group shrink-0"
-        >
-          <div className="p-1.5 rounded-2xl bg-gradient-to-br from-orange-400/20 to-orange-500/10 border border-orange-200/70 shadow-xs shrink-0 transition-transform group-hover:scale-105">
-            <img
-              alt="EBook Wedding Logo"
-              className="h-8 sm:h-9 w-auto object-contain"
-              src={APP_ASSETS.logo}
-            />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-headline text-[16px] sm:text-[18px] lg:text-[19px] font-bold text-[#c2410c] truncate leading-tight tracking-tight group-hover:text-orange-600 transition-colors">
-              {session.weddingTitle || 'The Wedding of Kevin & Clarissa'}
-            </span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="font-body text-[11px] font-semibold text-orange-900/70 shrink-0">
-                {session.weddingDate || '20 Sep 2026'}
+    <header className="fixed top-0 inset-x-0 md:left-64 lg:left-72 z-30 bg-white/85 backdrop-blur-2xl shadow-[0_4px_20px_-2px_rgba(234,88,12,0.06)] border-b border-orange-100/80 transition-all">
+      <div className="w-full h-16 md:h-18 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+        {/* Mobile View: Hamburger Menu + Logo Title */}
+        <div className="flex md:hidden items-center gap-2.5 min-w-0 flex-1">
+          <button
+            type="button"
+            onClick={onToggleMobileMenu}
+            className="w-10 h-10 rounded-xl bg-orange-50 hover:bg-orange-100 active:bg-orange-200 border border-orange-200 text-orange-950 flex items-center justify-center transition-colors shrink-0 shadow-2xs"
+            title="Buka Menu Navigasi"
+          >
+            <span className="material-symbols-outlined text-[24px]">menu</span>
+          </button>
+
+          <div
+            onClick={() => setActiveTab('buku-tamu')}
+            className="flex items-center gap-2 min-w-0 cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-orange-100 p-0.5 border border-orange-200 shrink-0">
+              <img
+                alt="Logo"
+                className="w-full h-full object-contain"
+                src={APP_ASSETS.logo}
+              />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-headline text-[14px] font-bold text-orange-950 truncate leading-tight">
+                {session.weddingTitle || 'Kevin & Clarissa'}
               </span>
-              <span className="inline-block w-1 h-1 rounded-full bg-orange-300"></span>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-body text-[10px] font-bold shadow-2xs">
-                <span className="material-symbols-outlined text-[11px] leading-none text-emerald-600">cloud_done</span>
-                Firebase Cloud Sync
+              <span className="font-body text-[10px] text-stone-500 truncate">
+                {currentTabInfo.title}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Center: Desktop Navigation Bar (md:flex) */}
-        <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 bg-orange-100/50 p-1.5 rounded-2xl border border-orange-200/60 shadow-2xs backdrop-blur-md">
-          {desktopNavItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-3 lg:px-4 py-2 rounded-xl font-body text-[12.5px] lg:text-[13px] font-semibold transition-all active:scale-95 ${
-                  isActive
-                    ? 'btn-citrus-primary shadow-xs'
-                    : 'text-stone-700 hover:text-orange-950 hover:bg-white/70'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[18px] leading-none">
-                  {item.icon}
+        {/* Desktop View: Active Tab Breadcrumb & Title */}
+        <div className="hidden md:flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-orange-500/20 border border-orange-200/80 flex items-center justify-center text-orange-700 shadow-2xs shrink-0">
+            <span className="material-symbols-outlined text-[22px]">
+              {currentTabInfo.icon}
+            </span>
+          </div>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="font-headline text-[16px] lg:text-[18px] font-bold text-stone-900 tracking-tight leading-tight">
+                {currentTabInfo.title}
+              </h1>
+              {activeTab === 'buku-tamu' && guestCount !== undefined && guestCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-orange-100 text-orange-800 border border-orange-200 shadow-2xs">
+                  {guestCount} Tamu Terdaftar
                 </span>
-                <span>{item.label}</span>
-                {item.badge && (
-                  <span
-                    className={`ml-1 px-1.5 py-0.2 rounded-full text-[10.5px] font-bold ${
-                      isActive ? 'bg-orange-800/60 text-white' : 'bg-orange-200/80 text-orange-900'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+              )}
+            </div>
+            <p className="font-body text-[11px] text-stone-500 truncate mt-0.5 max-w-xl">
+              {currentTabInfo.subtitle}
+            </p>
+          </div>
+        </div>
 
-        {/* Right: Particle Toggle, Quick QR Button & Receptionist / WO Profile button */}
-        <div className="flex items-center gap-2 shrink-0">
-          {onToggleParticles && (
+        {/* Right Actions: Profile / Desk Info */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Quick Kiosk Display Button */}
+          {onOpenKiosk && (
             <button
               type="button"
-              onClick={onToggleParticles}
-              title={particlesEnabled ? 'Efek Bunga & Salju: Aktif (Klik matikan)' : 'Efek Bunga & Salju: Mati (Klik aktifkan)'}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border transition-all flex items-center justify-center shadow-xs active:scale-95 ${
-                particlesEnabled
-                  ? 'bg-orange-50 text-orange-600 border-orange-300 ring-2 ring-orange-400/20'
-                  : 'bg-white/80 text-gray-400 border-gray-200 hover:text-orange-500'
-              }`}
+              onClick={onOpenKiosk}
+              title="Buka Layar Kiosk Interaktif & Slideshow Tamu"
+              className="h-9 px-2.5 sm:px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-300 ring-1 ring-amber-400/40 shadow-2xs flex items-center gap-1.5 transition-all active:scale-95 text-xs font-bold"
             >
-              <span className="text-[14px] sm:text-[15px]">🌸</span>
+              <span className="material-symbols-outlined text-[19px] text-amber-400">tv</span>
+              <span className="hidden sm:inline">Kiosk Display</span>
             </button>
           )}
 
-          {onOpenQRScan && (
-            <button
-              onClick={onOpenQRScan}
-              title="Tampilkan QR Meja Tamu (Form RSVP Mandiri)"
-              className="h-9 sm:h-10 px-3 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white transition-all flex items-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95 font-body text-[12px] font-bold"
-            >
-              <span className="material-symbols-outlined text-[19px]">qr_code_2</span>
-              <span className="hidden lg:inline">QR Tamu</span>
-            </button>
-          )}
+          {/* Quick Help & Guide Button */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('panduan-bantuan')}
+            title="Panduan Penggunaan & Bantuan (+6282186371356)"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-95 ${
+              activeTab === 'panduan-bantuan'
+                ? 'bg-orange-600 text-white shadow-xs'
+                : 'bg-white hover:bg-orange-50 text-stone-600 hover:text-orange-600 ring-1 ring-orange-200/80 shadow-2xs'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[20px]">help</span>
+          </button>
 
           {/* User Profile / Desk Switcher */}
           <button
             onClick={onOpenAdminPortal}
             title={`${session.name} (${session.deskName}) - Buka Akun / Admin Portal`}
-            className="flex items-center gap-2 pl-1 pr-2 sm:pr-3 py-1 rounded-2xl ring-1.5 ring-orange-200 hover:ring-orange-400 transition-all active:scale-95 bg-white/90 shadow-2xs hover:shadow-xs group"
+            className="flex items-center gap-2 pl-1.5 pr-2.5 sm:pr-3 py-1 rounded-2xl ring-1 ring-orange-200/90 hover:ring-orange-400 transition-all active:scale-95 bg-white/95 shadow-2xs hover:shadow-xs group"
           >
-            <div className="relative w-8 h-8 rounded-xl overflow-hidden ring-1 ring-orange-200 group-hover:scale-105 transition-transform">
+            <div className="relative w-8 h-8 rounded-xl overflow-hidden ring-1 ring-orange-200 group-hover:scale-105 transition-transform shrink-0">
               <img
                 alt="Profile"
                 className="w-full h-full object-cover"
@@ -140,12 +173,12 @@ export const Header: React.FC<HeaderProps> = ({
               />
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full ring-1 ring-white"></span>
             </div>
-            <div className="hidden lg:flex flex-col text-left leading-tight">
-              <span className="font-body text-[12px] font-bold text-stone-900 group-hover:text-orange-600 transition-colors truncate max-w-[110px]">
+            <div className="flex flex-col text-left leading-tight">
+              <span className="font-body text-[11.5px] sm:text-[12px] font-bold text-stone-900 group-hover:text-orange-600 transition-colors truncate max-w-[110px]">
                 {session.name}
               </span>
-              <span className="font-body text-[10px] text-stone-500 truncate max-w-[110px]">
-                {session.deskName || 'Resepsionis'}
+              <span className="font-body text-[9.5px] sm:text-[10px] text-stone-500 truncate max-w-[110px]">
+                {session.deskName || 'Admin / WO'}
               </span>
             </div>
           </button>
@@ -154,3 +187,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

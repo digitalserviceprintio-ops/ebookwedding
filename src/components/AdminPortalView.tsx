@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { APP_ASSETS } from '../data/initialData';
-import { UserSession, UserRole } from '../types';
+import { UserSession, UserRole, TabType } from '../types';
+import { auth, loginWithEmail, resetPasswordForEmail } from '../lib/firebase';
+import { sound } from '../utils/sound';
 
 interface AdminPortalViewProps {
   session: UserSession;
   onUpdateSession: (newSession: Partial<UserSession>) => void;
-  onNavigateToTab?: (tab: 'buku-tamu' | 'input-tamu') => void;
+  onNavigateToTab?: (tab: TabType) => void;
   onResetDatabase?: () => void;
   onExportBackup?: () => void;
   onLogout?: () => void;
@@ -19,16 +21,28 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
   onExportBackup,
   onLogout,
 }) => {
-  const [role, setRole] = useState<UserRole>(session.role);
-  const [email, setEmail] = useState(
-    role === 'admin'
-      ? 'admin.wedding@organizer.com'
-      : 'receptionist.desk@organizer.com'
-  );
-  const [password, setPassword] = useState('WeddingKevinClarissa2024!');
+  const registeredEmail =
+    auth.currentUser?.email ||
+    (session.email && !session.email.includes('organizer.com') ? session.email : '') ||
+    session.email ||
+    '';
+
+  const [role, setRole] = useState<UserRole>(session.role || 'admin');
+  const [email, setEmail] = useState<string>(registeredEmail);
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberSession, setRememberSession] = useState(true);
+  const [loadingAuth, setLoadingAuth] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Keep email synced with active authenticated user
+  useEffect(() => {
+    const active = auth.currentUser?.email || session.email;
+    if (active && !active.includes('organizer.com')) {
+      setEmail(active);
+    }
+  }, [session.email]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -38,55 +52,95 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
   };
 
   const handleSwitchRole = (newRole: UserRole) => {
+    sound.playTap();
     setRole(newRole);
-    if (newRole === 'admin') {
-      setEmail('admin.wedding@organizer.com');
-      onUpdateSession({
-        role: 'admin',
-        email: 'admin.wedding@organizer.com',
-        deskName: 'Meja Resepsionis A',
-      });
-      showToast('Beralih ke mode Admin Utama');
-    } else {
-      setEmail('receptionist.desk@organizer.com');
-      onUpdateSession({
-        role: 'reception',
-        email: 'receptionist.desk@organizer.com',
-        deskName: 'Meja 2 (Reguler)',
-      });
-      showToast('Beralih ke mode Petugas Meja (Kiosk)');
-    }
+    onUpdateSession({
+      role: newRole,
+      deskName: newRole === 'admin' ? 'Meja Admin Utama' : (session.deskName || 'Meja Resepsionis A'),
+    });
+    showToast(`Beralih ke mode ${newRole === 'admin' ? 'Admin Utama' : 'Petugas Meja (Kiosk)'}`);
   };
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showToast('Validasi Firebase Auth Token berhasil! Sesi terenkripsi aktif.');
-    onUpdateSession({
-      isAuthenticated: true,
-      email,
-      role,
-    });
-    if (onNavigateToTab) {
-      setTimeout(() => {
-        onNavigateToTab('buku-tamu');
-      }, 1000);
+    setAuthError(null);
+    sound.playTap();
+
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      setAuthError('Silakan masukkan alamat email akun Anda.');
+      return;
+    }
+
+    // If password is blank but session is already authenticated with this email
+    if (!password) {
+      if (session.isAuthenticated && (session.email === targetEmail || auth.currentUser?.email === targetEmail)) {
+        onUpdateSession({
+          role,
+          isAuthenticated: true,
+        });
+        showToast('Sesi akun terdaftar aktif dan berhasil dikonfirmasi.');
+        if (onNavigateToTab) {
+          setTimeout(() => onNavigateToTab('buku-tamu'), 800);
+        }
+        return;
+      }
+      setAuthError('Silakan masukkan kata sandi akun terdaftar Anda.');
+      return;
+    }
+
+    setLoadingAuth(true);
+    try {
+      const user = await loginWithEmail(targetEmail, password);
+      sound.playScanSuccess();
+      showToast(`Berhasil masuk dengan akun terdaftar: ${user.email}`);
+      onUpdateSession({
+        isAuthenticated: true,
+        email: user.email || targetEmail,
+        name: user.displayName || user.email?.split('@')[0] || session.name,
+        uid: user.uid,
+        role,
+      });
+      setPassword('');
+      if (onNavigateToTab) {
+        setTimeout(() => {
+          onNavigateToTab('buku-tamu');
+        }, 900);
+      }
+    } catch (err: any) {
+      sound.playError();
+      const code = err?.code || '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        setAuthError('Kata sandi tidak sesuai dengan akun terdaftar ini. Silakan periksa kembali atau gunakan Lupa Kata Sandi.');
+      } else if (code === 'auth/user-not-found') {
+        setAuthError('Akun belum terdaftar. Pastikan memasukkan alamat email yang sudah didaftarkan sebelumnya.');
+      } else {
+        setAuthError(err.message || 'Gagal memverifikasi akun terdaftar.');
+      }
+    } finally {
+      setLoadingAuth(false);
     }
   };
 
-  const handleGoogleAuth = () => {
-    showToast('Menghubungkan ke Google Identity Provider (Firebase)... Berhasil login!');
-    onUpdateSession({
-      isAuthenticated: true,
-      email: 'organizer.google@wedding.com',
-    });
-    if (onNavigateToTab) {
-      setTimeout(() => {
-        onNavigateToTab('buku-tamu');
-      }, 1000);
+  const handleForgotPassword = async () => {
+    const targetEmail = email.trim() || session.email || auth.currentUser?.email || '';
+    if (!targetEmail) {
+      showToast('Ketik alamat email akun Anda terlebih dahulu.');
+      return;
+    }
+    sound.playTap();
+    try {
+      await resetPasswordForEmail(targetEmail);
+      sound.playSuccess();
+      showToast(`Tautan pemulihan kata sandi telah dikirim ke ${targetEmail}`);
+    } catch (err: any) {
+      sound.playError();
+      showToast('Gagal mengirim tautan reset: ' + (err?.message || 'Pastikan email sudah terdaftar.'));
     }
   };
 
   const handleQuickPin = (deskName: string, pin: string) => {
+    sound.playTap();
     showToast(`PIN ${pin} Terverifikasi! Membuka check-in cepat ${deskName}...`);
     onUpdateSession({
       role: 'reception',
@@ -140,54 +194,88 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
               </div>
             </div>
 
-            {/* Security Notice Pill */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-xl border border-orange-200/70 w-full sm:w-auto">
-              <span className="material-symbols-outlined text-base text-orange-600 fill-1">
-                lock
-              </span>
-              <span className="font-body text-xs text-orange-950 font-medium">
-                Firebase Auth 256-bit Encrypted Session
-              </span>
+
+            {/* Active Registered Account Card */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-amber-500/10 border border-orange-200 shadow-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span className="font-body text-xs font-bold text-stone-900">
+                    Akun Terdaftar Aktif
+                  </span>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-orange-100 text-orange-900 border border-orange-200">
+                  {role === 'admin' ? 'Admin Utama' : 'Petugas Meja (Kiosk)'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 bg-white/90 p-3 rounded-xl border border-orange-200/80">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                  {(session.name || session.email || 'A')[0].toUpperCase()}
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="font-body text-xs sm:text-sm font-bold text-stone-900 truncate">
+                    {session.name || 'Penyelenggara Acara'}
+                  </span>
+                  <span className="font-body text-xs text-orange-700 font-medium truncate flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">mail</span>
+                    {session.email || auth.currentUser?.email || 'Belum masuk'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Role Switcher Tabs */}
-            <div className="w-full bg-orange-50/80 p-1.5 rounded-xl flex items-center gap-1.5 border border-orange-200/60">
-              <button
-                type="button"
-                onClick={() => handleSwitchRole('admin')}
-                className={`flex-1 py-2 px-3 rounded-lg font-body text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                  role === 'admin'
-                    ? 'bg-white text-orange-700 shadow-xs border border-orange-200'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                <span className="material-symbols-outlined text-base">shield_person</span>
-                <span>Admin Utama</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchRole('reception')}
-                className={`flex-1 py-2 px-3 rounded-lg font-body text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                  role === 'reception'
-                    ? 'bg-white text-orange-700 shadow-xs border border-orange-200'
-                    : 'text-stone-600 hover:text-stone-900'
-                }`}
-              >
-                <span className="material-symbols-outlined text-base">how_to_reg</span>
-                <span>Petugas Meja (Kiosk)</span>
-              </button>
+            <div className="space-y-1">
+              <label className="font-body text-xs text-stone-700 font-semibold">
+                Pilih Mode Peran (Role)
+              </label>
+              <div className="w-full bg-orange-50/80 p-1.5 rounded-xl flex items-center gap-1.5 border border-orange-200/60">
+                <button
+                  type="button"
+                  onClick={() => handleSwitchRole('admin')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-body text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    role === 'admin'
+                      ? 'bg-white text-orange-700 shadow-xs border border-orange-200'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">shield_person</span>
+                  <span>Admin Utama</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSwitchRole('reception')}
+                  className={`flex-1 py-2 px-3 rounded-lg font-body text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                    role === 'reception'
+                      ? 'bg-white text-orange-700 shadow-xs border border-orange-200'
+                      : 'text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-base">how_to_reg</span>
+                  <span>Petugas Meja (Kiosk)</span>
+                </button>
+              </div>
             </div>
 
-            {/* Standard Login Form */}
+            {/* Login / Konfirmasi Akun Terdaftar Form */}
             <form onSubmit={handleAuthSubmit} className="flex flex-col space-y-3.5 pt-1">
               {/* Email Input */}
               <div className="flex flex-col space-y-1">
-                <label
-                  htmlFor="adminEmail"
-                  className="font-body text-xs text-stone-700 font-semibold flex items-center gap-1"
-                >
-                  <span>Email Pengelola</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="adminEmail"
+                    className="font-body text-xs text-stone-700 font-semibold flex items-center gap-1"
+                  >
+                    <span>Email Akun Terdaftar</span>
+                  </label>
+                  <span className="text-[10.5px] text-orange-700 font-semibold">
+                    Akun Terverifikasi
+                  </span>
+                </div>
                 <div className="relative flex items-center">
                   <span className="material-symbols-outlined absolute left-3 text-lg text-orange-600">
                     mail
@@ -198,21 +286,28 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin.wedding@organizer.com"
+                    placeholder="nama@email.com"
                     className="w-full pl-10 pr-3 py-2.5 bg-white text-stone-900 font-body text-xs sm:text-sm rounded-xl outline-none focus:ring-2 focus:ring-orange-500 border border-orange-200/80 shadow-xs transition-all"
                   />
                 </div>
+                <p className="text-[11px] text-stone-500 italic">
+                  Gunakan email dari akun yang sudah didaftarkan sebelumnya.
+                </p>
               </div>
 
               {/* Password Input */}
               <div className="flex flex-col space-y-1">
                 <div className="flex items-center justify-between font-body text-xs">
                   <label htmlFor="adminPassword" className="text-stone-700 font-semibold">
-                    Password Akun
+                    Kata Sandi Akun
                   </label>
-                  <span className="font-body text-[10.5px] text-orange-700 font-bold">
-                    Master Key
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="font-body text-[10.5px] text-orange-700 font-bold hover:underline"
+                  >
+                    Lupa Kata Sandi?
+                  </button>
                 </div>
                 <div className="relative flex items-center">
                   <span className="material-symbols-outlined absolute left-3 text-lg text-orange-600">
@@ -221,10 +316,9 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                   <input
                     id="adminPassword"
                     type={showPassword ? 'text' : 'password'}
-                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan kata sandi..."
+                    placeholder="Masukkan kata sandi akun..."
                     className="w-full pl-10 pr-10 py-2.5 bg-white text-stone-900 font-body text-xs sm:text-sm rounded-xl outline-none focus:ring-2 focus:ring-orange-500 border border-orange-200/80 shadow-xs transition-all"
                   />
                   <button
@@ -239,7 +333,17 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                 </div>
               </div>
 
-              {/* Remember & Forgot Options */}
+              {/* Error Message */}
+              {authError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-start gap-2 animate-in fade-in">
+                  <span className="material-symbols-outlined text-rose-600 text-base shrink-0 mt-0.5">
+                    error
+                  </span>
+                  <span className="leading-snug">{authError}</span>
+                </div>
+              )}
+
+              {/* Remember Session */}
               <div className="flex items-center justify-between pt-0.5 font-body text-xs">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -250,57 +354,25 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                   />
                   <span className="text-stone-600">Ingat sesi di perangkat ini</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => showToast('Instruksi pemulihan password telah dikirim ke email panitia.')}
-                  className="text-orange-700 font-semibold hover:underline"
-                >
-                  Lupa Password?
-                </button>
               </div>
 
-              {/* Primary CTA: Firebase Auth Submit */}
+              {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-xl font-body text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-bold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                disabled={loadingAuth}
+                className="w-full py-3 px-4 rounded-xl font-body text-xs sm:text-sm text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 font-bold shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <span className="material-symbols-outlined text-xl">verified_user</span>
-                <span>Masuk dengan Firebase Auth</span>
-              </button>
-
-              {/* Alternative Social Auth Divider */}
-              <div className="relative flex items-center justify-center py-1">
-                <div className="w-full h-px bg-orange-100"></div>
-                <span className="absolute px-2.5 bg-white font-body text-[10px] text-stone-400 uppercase tracking-wider font-semibold">
-                  atau opsi cloud
-                </span>
-              </div>
-
-              {/* Google Sign In Option */}
-              <button
-                type="button"
-                onClick={handleGoogleAuth}
-                className="w-full py-2.5 px-4 bg-white hover:bg-orange-50 text-stone-800 font-body text-xs font-semibold rounded-xl shadow-xs border border-orange-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2.5"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  ></path>
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  ></path>
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    fill="#FBBC05"
-                  ></path>
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    fill="#EA4335"
-                  ></path>
-                </svg>
-                <span>Masuk dengan Akun Google (Firebase Auth)</span>
+                {loadingAuth ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-lg">sync</span>
+                    <span>Memverifikasi Akun...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-xl">login</span>
+                    <span>Masuk dengan Akun Terdaftar</span>
+                  </>
+                )}
               </button>
             </form>
           </div>
@@ -324,12 +396,12 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                 Petugas front desk dapat langsung beralih ke meja registrasi tamu menggunakan 4-digit PIN:
               </p>
 
-              <div className="grid grid-cols-2 gap-2 pt-0.5">
+              <div className="grid grid-cols-3 gap-2 pt-0.5">
                 {/* Desk 1 */}
                 <button
                   type="button"
                   onClick={() => handleQuickPin('Meja 1 (VIP & Family)', '8821')}
-                  className="p-3 bg-white hover:bg-orange-100/50 rounded-xl shadow-xs text-left flex flex-col space-y-1.5 active:scale-[0.97] transition-all border border-orange-200/80 group"
+                  className="p-2.5 sm:p-3 bg-white hover:bg-orange-100/50 rounded-xl shadow-xs text-left flex flex-col space-y-1.5 active:scale-[0.97] transition-all border border-orange-200/80 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-body text-xs text-stone-900 font-bold truncate group-hover:text-orange-700">
@@ -339,7 +411,7 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span className="font-body text-[10.5px] text-stone-500">PIN: •••• (8821)</span>
+                    <span className="font-body text-[10px] text-stone-500">PIN: 8821</span>
                   </div>
                 </button>
 
@@ -347,7 +419,7 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickPin('Meja 2 (Reguler)', '8822')}
-                  className="p-3 bg-white hover:bg-orange-100/50 rounded-xl shadow-xs text-left flex flex-col space-y-1.5 active:scale-[0.97] transition-all border border-orange-200/80 group"
+                  className="p-2.5 sm:p-3 bg-white hover:bg-orange-100/50 rounded-xl shadow-xs text-left flex flex-col space-y-1.5 active:scale-[0.97] transition-all border border-orange-200/80 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-body text-xs text-stone-900 font-bold truncate group-hover:text-orange-700">
@@ -359,7 +431,30 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span className="font-body text-[10.5px] text-stone-500">PIN: •••• (8822)</span>
+                    <span className="font-body text-[10px] text-stone-500">PIN: 8822</span>
+                  </div>
+                </button>
+
+                {/* Desk 3: Booth Souvenir */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleQuickPin('Booth Souvenir', '8823');
+                    if (onNavigateToTab) onNavigateToTab('kelola-souvenir');
+                  }}
+                  className="p-2.5 sm:p-3 bg-white hover:bg-orange-100/50 rounded-xl shadow-xs text-left flex flex-col space-y-1.5 active:scale-[0.97] transition-all border border-orange-200/80 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-body text-xs text-stone-900 font-bold truncate group-hover:text-orange-700">
+                      Booth Souvenir
+                    </span>
+                    <span className="material-symbols-outlined text-base text-purple-600">
+                      featured_seasonal_and_gifts
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                    <span className="font-body text-[10px] text-stone-500">Kupon &amp; Stok</span>
                   </div>
                 </button>
               </div>
@@ -427,6 +522,72 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
               )}
             </div>
 
+            {/* Tentang Aplikasi & Dukungan Pengembang */}
+            <div className="bg-gradient-to-br from-orange-50/80 via-amber-50/60 to-orange-50/80 rounded-2xl p-4 border border-orange-200/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-orange-600 text-lg">info</span>
+                  <span className="font-bold text-stone-900 text-xs sm:text-sm">
+                    Tentang Aplikasi &amp; Versi
+                  </span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10.5px] font-extrabold bg-orange-100 text-orange-800 border border-orange-200">
+                  v.1.02
+                </span>
+              </div>
+
+              <div className="p-3 bg-white/90 rounded-xl border border-orange-200/60 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Versi Sistem:</span>
+                  <strong className="text-stone-900 font-bold">wedding book v.1.02</strong>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Pengembang:</span>
+                  <strong className="text-orange-700 font-bold">microdata2r</strong>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t border-orange-100">
+                  <span className="text-stone-500">Bantuan WA:</span>
+                  <a
+                    href="https://wa.me/6282186371356"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                  >
+                    <span>+6282186371356</span>
+                    <span className="material-symbols-outlined text-xs">open_in_new</span>
+                  </a>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-stone-500">Email:</span>
+                  <a
+                    href="mailto:digitalserviceprint.io@gmail.com"
+                    className="font-semibold text-orange-600 hover:underline truncate max-w-[180px]"
+                  >
+                    digitalserviceprint.io@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => onNavigateToTab?.('panduan-bantuan')}
+                  className="py-2 px-3 bg-white hover:bg-orange-100/60 rounded-xl text-stone-800 text-xs font-bold flex items-center justify-center gap-1.5 border border-orange-200 shadow-2xs transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm text-orange-600">help</span>
+                  <span>Buka Panduan</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onNavigateToTab?.('tentang-aplikasi')}
+                  className="py-2 px-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-2xs transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">menu_book</span>
+                  <span>Tentang &amp; Rilis</span>
+                </button>
+              </div>
+            </div>
+
             {/* Live Server Status Bar */}
             <div className="pt-2 flex items-center justify-between font-body text-xs text-stone-500 border-t border-orange-200/50">
               <div className="flex items-center gap-2">
@@ -440,7 +601,7 @@ export const AdminPortalView: React.FC<AdminPortalViewProps> = ({
               </div>
               <div className="flex items-center gap-1 text-orange-700 font-semibold">
                 <span className="material-symbols-outlined text-sm">cloud_done</span>
-                <span>v2.4.0 Synced</span>
+                <span>wedding book v.1.02</span>
               </div>
             </div>
           </div>

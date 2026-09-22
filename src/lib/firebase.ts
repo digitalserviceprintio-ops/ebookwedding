@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
   User
 } from 'firebase/auth';
 import { 
@@ -143,6 +144,15 @@ export function cleanGuestForFirestore(guest: Guest, userId: string): Record<str
   if (guest.rsvpStatus) {
     raw.rsvpStatus = guest.rsvpStatus;
   }
+  if (typeof guest.souvenirTaken === 'boolean') {
+    raw.souvenirTaken = guest.souvenirTaken;
+  }
+  if (typeof guest.souvenirTakenAt === 'number') {
+    raw.souvenirTakenAt = guest.souvenirTakenAt;
+  }
+  if (guest.souvenirItemId) {
+    raw.souvenirItemId = guest.souvenirItemId;
+  }
 
   // Filter out any undefined or null keys to avoid Firebase SDK rejection
   const cleaned: Record<string, any> = {};
@@ -196,6 +206,10 @@ export async function loginWithEmail(email: string, pass: string) {
     localStorage.setItem('wedding_active_uid', userCredential.user.uid);
   }
   return userCredential.user;
+}
+
+export async function resetPasswordForEmail(email: string) {
+  return sendPasswordResetEmail(auth, email.trim());
 }
 
 export async function loginDemoAccount(label = 'Demo Pengantin') {

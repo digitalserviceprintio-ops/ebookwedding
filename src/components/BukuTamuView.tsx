@@ -174,13 +174,17 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
         </div>
       )}
 
-      {/* Live Status & Event Banner */}
-      <div className="relative overflow-hidden rounded-2xl glass-panel p-4 sm:p-5 shadow-sm border border-white/90">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Live Status & Event Banner with Glassmorphism Effect */}
+      <div className="relative overflow-hidden rounded-2xl glass-panel p-4 sm:p-5 shadow-sm border border-white/95 hover:border-orange-200/80 transition-all duration-300 group">
+        {/* Ambient background glow orb */}
+        <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-gradient-to-br from-orange-400/20 to-amber-300/10 blur-2xl pointer-events-none animate-ambient-pulse" />
+        <div className="absolute -bottom-10 -left-10 w-28 h-28 rounded-full bg-gradient-to-tr from-rose-400/15 to-orange-300/10 blur-xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <span className="relative flex h-3.5 w-3.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-orange-600"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-orange-600 shadow-xs shadow-orange-500/50"></span>
             </span>
             <div className="flex flex-col min-w-0">
               <span className="font-body text-[11px] sm:text-[12px] font-bold text-orange-600 uppercase tracking-wider">
@@ -192,78 +196,115 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100/70 border border-orange-200/60 shadow-2xs">
-              <span className="material-symbols-outlined text-[15px] text-orange-700 fill-1">
-                cloud_done
-              </span>
-              <span className="font-body text-[11.5px] font-bold text-orange-800">
-                Firestore Cloud Active
-              </span>
-            </div>
             <button
               onClick={onOpenQRScan}
-              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/90 border border-orange-200 text-orange-800 text-[11.5px] font-bold hover:bg-orange-50 transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/95 border border-orange-200/90 text-orange-800 text-[11.5px] font-bold hover:bg-orange-50 hover:border-orange-300 transition-all shadow-2xs active:scale-95"
             >
-              <span className="material-symbols-outlined text-[15px]">qr_code_2</span>
+              <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
               <span>QR Mandiri</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Real-time Metric Summary Cards */}
+      {/* Real-time Metric Summary Cards with Glassmorphism UI & Animations */}
       <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6">
         {/* Card 1: Total Tamu */}
-        <div className="flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl glass-card border border-white/90 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-orange-600 text-2xl sm:text-3xl">groups</span>
-            <span className="font-body text-[10px] sm:text-[11px] font-bold text-orange-800 bg-orange-100/80 px-2 py-0.5 rounded-full border border-orange-200/50">
+        <div 
+          onClick={() => {
+            sound.playTap();
+            setFilterType('all');
+          }}
+          className="glass-metric-card group flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl cursor-pointer select-none"
+        >
+          {/* Glass Sheen Light Sweep Animation Layer */}
+          <div className="glass-sheen" />
+
+          {/* Ambient Glowing Orbs */}
+          <div className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-gradient-to-br from-orange-400/25 to-amber-300/20 blur-xl pointer-events-none animate-ambient-pulse group-hover:scale-125 transition-transform duration-500" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white/80 backdrop-blur-md ring-1 ring-orange-200/60 shadow-xs flex items-center justify-center text-orange-600 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+              <span className="material-symbols-outlined text-2xl sm:text-3xl">groups</span>
+            </div>
+            <span className="font-body text-[10px] sm:text-[11px] font-bold text-orange-800 bg-orange-100/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-orange-200/70 shadow-2xs">
               Hadir ({stats.totalPax} Pax)
             </span>
           </div>
-          <div className="mt-3">
-            <span className="font-headline text-[22px] sm:text-[28px] lg:text-[32px] font-bold text-stone-900 block leading-tight">
+
+          <div className="relative z-10 mt-3 sm:mt-4">
+            <span className="font-headline text-[22px] sm:text-[28px] lg:text-[34px] font-extrabold text-stone-900 block leading-tight tracking-tight">
               {stats.totalCount}
             </span>
-            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/70 truncate block mt-0.5 font-medium">
+            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/75 truncate block mt-0.5 font-medium group-hover:text-orange-600 transition-colors">
               Total Tamu Hadir
             </span>
           </div>
         </div>
 
         {/* Card 2: Total Amplop */}
-        <div className="flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl glass-card border border-white/90 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-amber-600 text-2xl sm:text-3xl">payments</span>
-            <span className="font-body text-[10px] sm:text-[11px] font-bold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-200/50">
+        <div 
+          onClick={() => {
+            sound.playTap();
+            setFilterType('amplop');
+          }}
+          className="glass-metric-card group flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl cursor-pointer select-none"
+        >
+          {/* Glass Sheen Light Sweep Animation Layer */}
+          <div className="glass-sheen" />
+
+          {/* Ambient Glowing Orbs */}
+          <div className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-gradient-to-br from-amber-400/25 to-orange-400/15 blur-xl pointer-events-none animate-ambient-pulse group-hover:scale-125 transition-transform duration-500 [animation-delay:2.5s]" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white/80 backdrop-blur-md ring-1 ring-amber-200/60 shadow-xs flex items-center justify-center text-amber-600 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+              <span className="material-symbols-outlined text-2xl sm:text-3xl">payments</span>
+            </div>
+            <span className="font-body text-[10px] sm:text-[11px] font-bold text-amber-900 bg-amber-100/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-amber-200/70 shadow-2xs">
               {stats.amplopCount} Amplop
             </span>
           </div>
-          <div className="mt-3">
-            <span className="font-headline text-[20px] sm:text-[26px] lg:text-[30px] font-bold text-stone-900 block leading-tight truncate">
+
+          <div className="relative z-10 mt-3 sm:mt-4">
+            <span className="font-headline text-[20px] sm:text-[26px] lg:text-[30px] font-extrabold text-stone-900 block leading-tight truncate tracking-tight">
               {stats.formattedNominal}
             </span>
-            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/70 truncate block mt-0.5 font-medium">
+            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/75 truncate block mt-0.5 font-medium group-hover:text-amber-700 transition-colors">
               Total Titipan Amplop
             </span>
           </div>
         </div>
 
         {/* Card 3: Total Kado */}
-        <div className="flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl glass-card border border-white/90 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-orange-500 text-2xl sm:text-3xl">
-              featured_seasonal_and_gifts
-            </span>
-            <span className="font-body text-[10px] sm:text-[11px] font-bold text-orange-900 bg-orange-100/80 px-2 py-0.5 rounded-full border border-orange-200/50">
+        <div 
+          onClick={() => {
+            sound.playTap();
+            setFilterType('kado');
+          }}
+          className="glass-metric-card group flex flex-col justify-between p-3.5 sm:p-5 rounded-2xl cursor-pointer select-none"
+        >
+          {/* Glass Sheen Light Sweep Animation Layer */}
+          <div className="glass-sheen" />
+
+          {/* Ambient Glowing Orbs */}
+          <div className="absolute -right-6 -bottom-6 w-28 h-28 rounded-full bg-gradient-to-br from-orange-400/25 to-rose-400/15 blur-xl pointer-events-none animate-ambient-pulse group-hover:scale-125 transition-transform duration-500 [animation-delay:4.5s]" />
+
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white/80 backdrop-blur-md ring-1 ring-orange-200/60 shadow-xs flex items-center justify-center text-orange-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+              <span className="material-symbols-outlined text-2xl sm:text-3xl">
+                featured_seasonal_and_gifts
+              </span>
+            </div>
+            <span className="font-body text-[10px] sm:text-[11px] font-bold text-orange-900 bg-orange-100/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-orange-200/70 shadow-2xs">
               {stats.kadoCount} Paket
             </span>
           </div>
-          <div className="mt-3">
-            <span className="font-headline text-[22px] sm:text-[28px] lg:text-[32px] font-bold text-stone-900 block leading-tight">
+
+          <div className="relative z-10 mt-3 sm:mt-4">
+            <span className="font-headline text-[22px] sm:text-[28px] lg:text-[34px] font-extrabold text-stone-900 block leading-tight tracking-tight">
               {stats.kadoCount}
             </span>
-            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/70 truncate block mt-0.5 font-medium">
+            <span className="font-body text-[11.5px] sm:text-[13px] text-orange-950/75 truncate block mt-0.5 font-medium group-hover:text-orange-600 transition-colors">
               Kado Fisik Diterima
             </span>
           </div>
@@ -412,24 +453,6 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
                 ({stats.rsvpCount})
               </span>
             </button>
-
-            <button
-              onClick={() => {
-                sound.playTap();
-                setFilterType('resepsionis');
-              }}
-              className={`px-3 py-1.5 rounded-full font-body text-[11.5px] font-semibold transition-all flex items-center gap-1 ${
-                filterType === 'resepsionis'
-                  ? 'btn-citrus-primary shadow-xs'
-                  : 'bg-white/80 backdrop-blur-md text-stone-700 hover:bg-orange-50/60 border border-orange-200/60'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[14px]">desk</span>
-              <span>Meja Resepsi</span>
-              <span className={filterType === 'resepsionis' ? 'text-orange-100' : 'text-stone-400'}>
-                ({stats.deskCount})
-              </span>
-            </button>
           </div>
 
           {/* Quick Sort dropdown */}
@@ -460,7 +483,7 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
               className="text-orange-700 font-bold hover:underline flex items-center gap-1 bg-orange-100/80 border border-orange-200/60 px-2.5 py-1 rounded-xl text-[11px] transition-colors shadow-2xs"
             >
               <span className="material-symbols-outlined text-[15px]">person_add</span>
-              + Meja Resepsi
+              + Tambah Tamu
             </button>
             {onOpenRSVP && (
               <button
@@ -556,7 +579,7 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
             </button>
           </div>
         ) : (
-          <div className="glass-panel rounded-2xl overflow-hidden border border-white/90 shadow-sm">
+          <div className="glass-panel rounded-2xl overflow-hidden border border-white/95 shadow-md backdrop-blur-xl transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/5">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[760px] md:min-w-full">
                 <thead>
@@ -696,30 +719,33 @@ export const BukuTamuView: React.FC<BukuTamuViewProps> = ({
 
                         {/* Kado / Souvenir */}
                         <td className="py-3 px-3">
-                          {guest.hasGift ? (
-                            <div className="inline-flex items-center gap-1 text-[11.5px] text-amber-900 bg-amber-50/80 border border-amber-200/60 px-2 py-1 rounded-lg">
-                              <span className="material-symbols-outlined text-[14px] text-amber-600 shrink-0">
-                                redeem
-                              </span>
-                              <span className="font-medium truncate max-w-[130px]">
-                                {guest.giftDescription || 'Kado Fisik'}
-                              </span>
-                              {guest.giftShelf && (
-                                <span className="text-[10px] font-bold text-amber-800 shrink-0 bg-amber-100 px-1 rounded">
-                                  {guest.giftShelf}
+                          <div className="flex flex-col gap-1">
+                            {guest.hasGift && (
+                              <div className="inline-flex items-center gap-1 text-[11.5px] text-amber-900 bg-amber-50/80 border border-amber-200/60 px-2 py-0.5 rounded-lg w-fit">
+                                <span className="material-symbols-outlined text-[14px] text-amber-600 shrink-0">
+                                  redeem
                                 </span>
-                              )}
-                            </div>
-                          ) : guest.souvenirTaken ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
-                              <span className="material-symbols-outlined text-[13px]">
-                                check_circle
+                                <span className="font-medium truncate max-w-[130px]">
+                                  {guest.giftDescription || 'Kado Fisik'}
+                                </span>
+                                {guest.giftShelf && (
+                                  <span className="text-[10px] font-bold text-amber-800 shrink-0 bg-amber-100 px-1 rounded">
+                                    {guest.giftShelf}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {guest.souvenirTaken ? (
+                              <span className="inline-flex items-center gap-1 text-[10.5px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 w-fit">
+                                <span className="material-symbols-outlined text-[13px]">
+                                  check_circle
+                                </span>
+                                Souvenir Ditukar
                               </span>
-                              Souvenir
-                            </span>
-                          ) : (
-                            <span className="text-stone-400 text-[11px] italic">-</span>
-                          )}
+                            ) : !guest.hasGift ? (
+                              <span className="text-stone-400 text-[11px] italic">-</span>
+                            ) : null}
+                          </div>
                         </td>
 
                         {/* Status Verifikasi */}

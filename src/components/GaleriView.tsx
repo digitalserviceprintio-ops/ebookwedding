@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { GalleryPhoto } from '../types';
+import { sound } from '../utils/sound';
 
 interface GaleriViewProps {
   photos: GalleryPhoto[];
   onAddPhoto: (newPhoto: GalleryPhoto) => void;
   onDeletePhoto?: (photoId: string) => void;
+  onOpenKiosk?: () => void;
 }
 
-export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDeletePhoto }) => {
+export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDeletePhoto, onOpenKiosk }) => {
   const [activeCategory, setActiveCategory] = useState<string>('Semua Foto');
   const [isSimulatingUpload, setIsSimulatingUpload] = useState(false);
   const [uploadPercent, setUploadPercent] = useState(100);
@@ -23,6 +25,16 @@ export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDe
 
   const categories = [
     { name: 'Semua Foto', count: photos.length },
+    {
+      name: 'Foto Pengantin & Prewedding',
+      count: photos.filter(
+        (p) =>
+          p.category === 'Foto Pengantin & Prewedding' ||
+          p.tags?.some((t) => t.toLowerCase().includes('pengantin')) ||
+          p.title.toLowerCase().includes('kevin') ||
+          p.title.toLowerCase().includes('clarissa')
+      ).length || 1,
+    },
     { name: 'Akad & Resepsi', count: 24 },
     { name: 'Tamu & Photobooth', count: 16 },
     { name: 'Dekorasi Venue', count: 8 },
@@ -30,6 +42,7 @@ export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDe
 
   const handleLike = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    sound.playTap();
     setLikesMap((prev) => {
       const current = prev[id] || { count: 50, userLiked: false };
       return {
@@ -100,9 +113,18 @@ export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDe
     link.click();
   };
 
-  const filteredPhotos = activeCategory === 'Semua Foto'
-    ? photos
-    : photos.filter((p) => p.category === activeCategory);
+  const filteredPhotos =
+    activeCategory === 'Semua Foto'
+      ? photos
+      : activeCategory === 'Foto Pengantin & Prewedding'
+      ? photos.filter(
+          (p) =>
+            p.category === 'Foto Pengantin & Prewedding' ||
+            p.tags?.some((t) => t.toLowerCase().includes('pengantin')) ||
+            p.title.toLowerCase().includes('kevin') ||
+            p.title.toLowerCase().includes('clarissa')
+        )
+      : photos.filter((p) => p.category === activeCategory);
 
   const heroPhoto = photos.find((p) => p.isPinned) || photos[0];
   const gridPhotos = filteredPhotos.filter((p) => p.id !== heroPhoto.id);
@@ -126,7 +148,96 @@ export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDe
         onChange={handleFileUpload}
       />
 
-      {/* Lightbox / Zoom Modal (Responsive Desktop & Mobile) */}
+      {/* Interactive Kiosk / Display Resepsi Banner */}
+      {onOpenKiosk && (
+        <div className="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 text-white border border-amber-500/30 shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
+              <span className="material-symbols-outlined text-2xl">tv</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                  Mode Display Kiosk
+                </span>
+                <span className="text-white/40">•</span>
+                <span className="text-xs text-stone-300">Layar Meja Resepsionis / TV Venue</span>
+              </div>
+              <h3 className="font-headline text-base sm:text-lg font-bold text-white tracking-tight">
+                Kiosk Interaktif Tamu &amp; Slideshow Foto Pengantin
+              </h3>
+              <p className="font-body text-xs text-stone-400">
+                Tampilkan foto Kevin &amp; Clarissa berputar otomatis, sambutan selamat datang, dan tombol check-in mandiri tamu.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto relative z-10">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playTap();
+                onOpenKiosk();
+              }}
+              className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">play_circle</span>
+              <span>Buka Layar Kiosk Display</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Header: Title & Cloud Sync with Citrus Theme */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1 border-b border-orange-200/50">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 shadow-xs border border-orange-200">
+              <span className="material-symbols-outlined text-lg fill-1">photo_library</span>
+            </span>
+            <h1 className="font-headline text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+              Galeri Dokumentasi
+            </h1>
+          </div>
+          <p className="font-body text-xs text-stone-500 mt-1 flex items-center gap-1.5 flex-wrap">
+            <span>{photos.length} Foto Aktif</span>
+            <span className="w-1 h-1 rounded-full bg-orange-300 inline-block"></span>
+            <span>Album Acara &amp; Tamu</span>
+            <span className="w-1 h-1 rounded-full bg-orange-300 inline-block"></span>
+            <span className="text-orange-700 font-medium flex items-center gap-0.5">
+              <span className="material-symbols-outlined text-[13px]">lock</span>
+              Firebase Cloud Storage Terenkripsi
+            </span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {onOpenKiosk && (
+            <button
+              onClick={() => {
+                sound.playTap();
+                onOpenKiosk();
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-300 font-body text-xs font-bold shadow-xs active:scale-95 transition-all border border-amber-400/30"
+              title="Tampilkan Kiosk Slideshow Layar Penuh"
+            >
+              <span className="material-symbols-outlined text-base">tv</span>
+              <span>Layar Kiosk</span>
+            </button>
+          )}
+          <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-800 font-body text-xs font-semibold shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+            Cloud Sync Aktif
+          </span>
+          <button
+            onClick={triggerUploadClick}
+            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-body text-xs font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-base">add_photo_alternate</span>
+            <span>Unggah Foto</span>
+          </button>
+        </div>
+      </div>
       {selectedPhoto && (
         <div
           onClick={() => setSelectedPhoto(null)}
@@ -214,44 +325,6 @@ export const GaleriView: React.FC<GaleriViewProps> = ({ photos, onAddPhoto, onDe
           </div>
         </div>
       )}
-
-      {/* Header: Title & Cloud Sync with Citrus Theme */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1 border-b border-orange-200/50">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 shadow-xs border border-orange-200">
-              <span className="material-symbols-outlined text-lg fill-1">photo_library</span>
-            </span>
-            <h1 className="font-headline text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
-              Galeri Dokumentasi
-            </h1>
-          </div>
-          <p className="font-body text-xs text-stone-500 mt-1 flex items-center gap-1.5 flex-wrap">
-            <span>{photos.length} Foto Aktif</span>
-            <span className="w-1 h-1 rounded-full bg-orange-300 inline-block"></span>
-            <span>4 Album Acara</span>
-            <span className="w-1 h-1 rounded-full bg-orange-300 inline-block"></span>
-            <span className="text-orange-700 font-medium flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[13px]">lock</span>
-              Firebase Cloud Storage Terenkripsi
-            </span>
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-800 font-body text-xs font-semibold shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-            Cloud Sync Aktif
-          </span>
-          <button
-            onClick={triggerUploadClick}
-            className="hidden sm:inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-body text-xs font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all"
-          >
-            <span className="material-symbols-outlined text-base">add_photo_alternate</span>
-            <span>Unggah Foto</span>
-          </button>
-        </div>
-      </div>
 
       {/* Main Responsive Grid Layout (Desktop: 12 Cols, Mobile: 1 Col) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">

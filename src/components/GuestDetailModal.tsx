@@ -8,6 +8,7 @@ interface GuestDetailModalProps {
   onClose: () => void;
   onUpdateGuest?: (updated: Guest) => void;
   onDeleteGuest?: (guestId: string) => void;
+  onToggleSouvenir?: (guestId: string, taken: boolean) => void;
 }
 
 export const GuestDetailModal: React.FC<GuestDetailModalProps> = ({
@@ -15,6 +16,7 @@ export const GuestDetailModal: React.FC<GuestDetailModalProps> = ({
   onClose,
   onUpdateGuest,
   onDeleteGuest,
+  onToggleSouvenir,
 }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
@@ -336,6 +338,45 @@ export const GuestDetailModal: React.FC<GuestDetailModalProps> = ({
                     <p className="text-[10.5px] text-stone-500 leading-tight mt-0.5">
                       Tunjukkan kupon ini ke booth souvenir di pintu keluar foyer.
                     </p>
+                  </div>
+
+                  {/* Souvenir Redemption Status & Action */}
+                  <div className="pt-2 border-t border-orange-200/80 flex flex-col items-center gap-1.5">
+                    {guest.souvenirTaken ? (
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200">
+                          <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                          <span>Souvenir Sudah Diambil</span>
+                        </span>
+                        {onToggleSouvenir && (
+                          <button
+                            type="button"
+                            onClick={() => onToggleSouvenir(guest.id, false)}
+                            className="text-[10.5px] text-stone-400 hover:text-rose-600 underline font-medium"
+                          >
+                            Batal
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full">
+                        {onToggleSouvenir ? (
+                          <button
+                            type="button"
+                            onClick={() => onToggleSouvenir(guest.id, true)}
+                            className="w-full py-1.5 px-3 rounded-xl btn-citrus-primary text-xs font-bold shadow-xs active:scale-95 flex items-center justify-center gap-1.5 transition-transform"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">redeem</span>
+                            <span>Tandai Souvenir Diambil</span>
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200">
+                            <span className="material-symbols-outlined text-[13px]">pending</span>
+                            <span>Souvenir Belum Diambil</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 

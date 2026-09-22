@@ -1,4 +1,4 @@
-import { Guest, GalleryPhoto, UserSession } from '../types';
+import { Guest, GalleryPhoto, UserSession, SouvenirItem } from '../types';
 
 export const APP_ASSETS = {
   logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDcJVNbayjuh8pQCC9sRCgYfji3OROasKxslXqtOiYfJ19yjjtdHypNWNcR1uwdQl43v0EzhJoO_Z9YIRVKwJJJnHAZYeAM9lz5kJ99ve9nDrUxhTf0-OtaEtNkUHtvABPXaFM4AdSj3GRcOdrcTcz28WdUlvhQL36M7xpULXGBGnDAqcstOtulD0djcF8V0bRy1SuhsFdAUst4ol86LtAQuzWql61_L8WRU7aGXZFcPUm7qp-hJdqd',
@@ -9,11 +9,11 @@ export const APP_ASSETS = {
 };
 
 export const INITIAL_SESSION: UserSession = {
-  email: 'admin.wedding@organizer.com',
+  email: '',
   role: 'admin',
   deskName: 'Meja Resepsionis A',
-  name: 'Sari Ratnasari (Head WO)',
-  isAuthenticated: true,
+  name: 'Penyelenggara Acara',
+  isAuthenticated: false,
   avatarUrl: APP_ASSETS.avatarReception,
 };
 
@@ -220,3 +220,34 @@ export const INITIAL_PHOTOS: GalleryPhoto[] = [
     authorRole: 'Clarissa',
   },
 ];
+
+export const INITIAL_SOUVENIRS: SouvenirItem[] = [
+  {
+    id: 'souv-1',
+    name: 'Cutlery Set Gold & Velvet Pouch',
+    category: 'Reguler',
+    totalStock: 350,
+    description: 'Set sendok, garpu, dan sedotan stainless steel mewah berukir inisial K&C dengan kantong beludru oranye.',
+    icon: 'restaurant',
+    color: 'from-amber-500 to-orange-500',
+  },
+  {
+    id: 'souv-2',
+    name: 'Aroma Diffuser & Reed Essential Oils',
+    category: 'VIP',
+    totalStock: 100,
+    description: 'Diffuser aromaterapi floral eksklusif edisi terbatas untuk Tamu Kehormatan & VIP.',
+    icon: 'spa',
+    color: 'from-purple-500 to-indigo-600',
+  },
+  {
+    id: 'souv-3',
+    name: 'Hampers Keramik Piring Saji & Teh Premium',
+    category: 'Keluarga',
+    totalStock: 50,
+    description: 'Paket hampers keramik piring hias artisan dan set daun teh melati khas Jawa Barat.',
+    icon: 'redeem',
+    color: 'from-rose-500 to-pink-600',
+  },
+];
+

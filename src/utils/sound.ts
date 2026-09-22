@@ -94,6 +94,29 @@ class SoundEffects {
   playSuccess() {
     this.playCheckInChime();
   }
+
+  // Soft low error buzz
+  playError() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, now); // A3
+    osc.frequency.setValueAtTime(196, now + 0.08); // G3
+
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.24);
+  }
 }
 
 export const sound = new SoundEffects();

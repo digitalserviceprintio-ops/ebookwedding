@@ -15,12 +15,16 @@ import {
   logoutUser 
 } from './lib/firebase';
 import { Header } from './components/Header';
+import { SidebarNav } from './components/SidebarNav';
 import { BottomNav } from './components/BottomNav';
 import { BukuTamuView } from './components/BukuTamuView';
 import { InputTamuView } from './components/InputTamuView';
+import { KelolaSouvenirView } from './components/KelolaSouvenirView';
 import { GaleriView } from './components/GaleriView';
 import { LaporanView } from './components/LaporanView';
 import { AdminPortalView } from './components/AdminPortalView';
+import { PanduanBantuanView } from './components/PanduanBantuanView';
+import { TentangAplikasiView } from './components/TentangAplikasiView';
 import { QRScanModal } from './components/QRScanModal';
 import { GuestDetailModal } from './components/GuestDetailModal';
 import { RSVPModal } from './components/RSVPModal';
@@ -31,12 +35,19 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('buku-tamu');
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [particlesEnabled, setParticlesEnabled] = useState(true);
+  const [particlesEnabled, setParticlesEnabled] = useState(false);
 
   const [session, setSession] = useState<UserSession>(() => {
     try {
       const saved = localStorage.getItem('ebook_wedding_session');
-      return saved ? JSON.parse(saved) : INITIAL_SESSION;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.email === 'admin.wedding@organizer.com' || parsed.email === 'receptionist.desk@organizer.com') {
+          parsed.email = '';
+        }
+        return parsed;
+      }
+      return INITIAL_SESSION;
     } catch {
       return INITIAL_SESSION;
     }
@@ -47,6 +58,7 @@ export default function App() {
 
   const [isQRScanOpen, setIsQRScanOpen] = useState(false);
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [prefillGuest, setPrefillGuest] = useState<Partial<Guest> | null>(null);
 
@@ -73,13 +85,21 @@ export default function App() {
       setAuthLoading(false);
 
       if (user) {
-        setSession((prev) => ({
-          ...prev,
-          uid: user.uid,
-          email: user.email || 'user@wedding.app',
-          name: user.displayName || user.email?.split('@')[0] || 'Pengguna Terdaftar',
-          isAuthenticated: true,
-        }));
+        setSession((prev) => {
+          const updated: UserSession = {
+            ...prev,
+            uid: user.uid,
+            email: user.email || prev.email || '',
+            name: user.displayName || user.email?.split('@')[0] || prev.name || 'Pengguna Terdaftar',
+            isAuthenticated: true,
+          };
+          try {
+            localStorage.setItem('ebook_wedding_session', JSON.stringify(updated));
+          } catch (e) {
+            console.error('Failed to persist session:', e);
+          }
+          return updated;
+        });
       } else {
         setSession((prev) => ({
           ...prev,
@@ -217,6 +237,46 @@ export default function App() {
     }
   };
 
+  const handleUpdateGuestSouvenir = async (guestId: string, taken: boolean, souvenirItemId?: string) => {
+    const updatedGuests = guests.map((g) => {
+      if (g.id === guestId) {
+        return {
+          ...g,
+          souvenirTaken: taken,
+          souvenirTakenAt: taken ? Date.now() : undefined,
+          souvenirItemId: taken ? souvenirItemId || g.souvenirItemId : undefined,
+        };
+      }
+      return g;
+    });
+
+    setGuests(updatedGuests);
+
+    if (selectedGuest && selectedGuest.id === guestId) {
+      setSelectedGuest((prev) =>
+        prev
+          ? {
+              ...prev,
+              souvenirTaken: taken,
+              souvenirTakenAt: taken ? Date.now() : undefined,
+              souvenirItemId: taken ? souvenirItemId || prev.souvenirItemId : undefined,
+            }
+          : null
+      );
+    }
+
+    if (firebaseUser) {
+      const target = updatedGuests.find((g) => g.id === guestId);
+      if (target) {
+        try {
+          await saveUserGuest(firebaseUser.uid, target);
+        } catch (err) {
+          console.error('Failed to sync souvenir status to Firestore:', err);
+        }
+      }
+    }
+  };
+
   const handleResetDatabase = async () => {
     if (firebaseUser) {
       for (const g of guests) {
@@ -340,6 +400,19 @@ export default function App() {
       {/* Floating Blossom & Snow Particles Overlay */}
       <FallingParticles enabled={particlesEnabled} />
 
+      {/* Responsive Modern Sidebar Navigation */}
+      <SidebarNav
+        session={session}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        guestCount={guests.length}
+        isOpenMobile={isMobileMenuOpen}
+        setIsOpenMobile={setIsMobileMenuOpen}
+        onOpenAdminPortal={() => setActiveTab('akun-admin')}
+        onOpenRSVP={() => setIsRSVPOpen(true)}
+        onLogout={handleLogout}
+      />
+
       {/* Top Header Bar with Live Cloud Sync indicator */}
       <Header
         session={session}
@@ -347,15 +420,14 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenAdminPortal={() => setActiveTab('akun-admin')}
         onOpenQRScan={() => setIsQRScanOpen(true)}
-        particlesEnabled={particlesEnabled}
-        onToggleParticles={() => setParticlesEnabled((p) => !p)}
+        onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         guestCount={guests.length}
       />
 
       {/* Main Content Area */}
       <main
-        className={`flex-1 w-full max-w-7xl mx-auto relative z-10 transition-all ${
-          activeTab === 'akun-admin' ? 'pt-4 md:pt-8' : 'pt-20 md:pt-24'
+        className={`flex-1 w-full md:pl-64 lg:pl-72 relative z-10 transition-all ${
+          activeTab === 'akun-admin' ? 'pt-4 md:pt-8' : 'pt-16 md:pt-20'
         }`}
       >
         {activeTab === 'buku-tamu' && (
@@ -380,6 +452,14 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'kelola-souvenir' && (
+          <KelolaSouvenirView
+            guests={guests}
+            onUpdateGuestSouvenir={handleUpdateGuestSouvenir}
+            onOpenQRScan={() => setIsQRScanOpen(true)}
+          />
+        )}
+
         {activeTab === 'galeri-wedding' && (
           <GaleriView
             photos={photos}
@@ -401,6 +481,14 @@ export default function App() {
             onExportBackup={handleExportBackup}
             onLogout={handleLogout}
           />
+        )}
+
+        {activeTab === 'panduan-bantuan' && (
+          <PanduanBantuanView onNavigateToTab={(tab) => setActiveTab(tab)} />
+        )}
+
+        {activeTab === 'tentang-aplikasi' && (
+          <TentangAplikasiView onNavigateToTab={(tab) => setActiveTab(tab)} />
         )}
       </main>
 
@@ -436,6 +524,7 @@ export default function App() {
         onClose={() => setSelectedGuest(null)}
         onUpdateGuest={handleUpdateGuest}
         onDeleteGuest={handleDeleteGuest}
+        onToggleSouvenir={handleUpdateGuestSouvenir}
       />
     </div>
   );

@@ -27,6 +27,19 @@ export interface Guest {
   rsvpStatus?: 'hadir' | 'ragu' | 'tidak_hadir';
   isRsvp?: boolean;
   souvenirTaken?: boolean;
+  souvenirTakenAt?: number;
+  souvenirItemId?: string;
+}
+
+export interface SouvenirItem {
+  id: string;
+  name: string;
+  category: 'Semua' | 'Reguler' | 'VIP' | 'Keluarga';
+  totalStock: number;
+  allocatedStock?: number;
+  description: string;
+  icon: string;
+  color: string;
 }
 
 export interface GalleryPhoto {
@@ -45,7 +58,15 @@ export interface GalleryPhoto {
   timestamp?: number;
 }
 
-export type TabType = 'buku-tamu' | 'input-tamu' | 'galeri-wedding' | 'laporan-dan-cetak' | 'akun-admin';
+export type TabType = 
+  | 'buku-tamu' 
+  | 'input-tamu' 
+  | 'kelola-souvenir' 
+  | 'galeri-wedding' 
+  | 'laporan-dan-cetak' 
+  | 'akun-admin'
+  | 'panduan-bantuan'
+  | 'tentang-aplikasi';
 
 export type UserRole = 'admin' | 'reception';
 
