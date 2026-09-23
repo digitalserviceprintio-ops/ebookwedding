@@ -108,7 +108,7 @@ export const KioskDisplayModal: React.FC<KioskDisplayModalProps> = ({
 
   const currentPhoto = displayPhotos[currentSlide] || displayPhotos[0];
   const recentGreetings = guests
-    .filter((g) => g.wishes && g.wishes.trim().length > 0)
+    .filter((g) => g.prayerWish && g.prayerWish.trim().length > 0)
     .slice(0, 10);
 
   return (
@@ -319,8 +319,8 @@ export const KioskDisplayModal: React.FC<KioskDisplayModalProps> = ({
             <div className="flex-1 overflow-hidden whitespace-nowrap">
               <div className="inline-block animate-marquee text-stone-300 text-[11px]">
                 {recentGreetings.map((g, i) => (
-                  <span key={g.id} className="mr-8">
-                    <strong className="text-amber-200 font-bold">{g.name}</strong>: &ldquo;{g.wishes}&rdquo;
+                  <span key={g.id || i} className="mr-8">
+                    <strong className="text-amber-200 font-bold">{g.name}</strong>: &ldquo;{g.prayerWish}&rdquo;
                   </span>
                 ))}
               </div>

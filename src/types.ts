@@ -46,7 +46,7 @@ export interface GalleryPhoto {
   id: string;
   userId?: string;
   title: string;
-  category: 'Akad & Resepsi' | 'Tamu & Photobooth' | 'Dekorasi Venue' | 'Semua Foto';
+  category: 'Foto Pengantin & Prewedding' | 'Akad & Resepsi' | 'Tamu & Photobooth' | 'Dekorasi Venue' | 'Semua Foto';
   time: string;
   location: string;
   url: string;

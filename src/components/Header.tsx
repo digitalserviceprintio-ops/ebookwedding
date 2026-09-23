@@ -61,6 +61,8 @@ export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
   onOpenAdminPortal,
+  onOpenQRScan,
+  onOpenKiosk,
   onToggleMobileMenu,
   guestCount,
 }) => {

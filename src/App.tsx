@@ -28,6 +28,7 @@ import { TentangAplikasiView } from './components/TentangAplikasiView';
 import { QRScanModal } from './components/QRScanModal';
 import { GuestDetailModal } from './components/GuestDetailModal';
 import { RSVPModal } from './components/RSVPModal';
+import { KioskDisplayModal } from './components/KioskDisplayModal';
 import { AuthView } from './components/AuthView';
 import { FallingParticles } from './components/FallingParticles';
 
@@ -58,6 +59,7 @@ export default function App() {
 
   const [isQRScanOpen, setIsQRScanOpen] = useState(false);
   const [isRSVPOpen, setIsRSVPOpen] = useState(false);
+  const [isKioskOpen, setIsKioskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [prefillGuest, setPrefillGuest] = useState<Partial<Guest> | null>(null);
@@ -410,6 +412,7 @@ export default function App() {
         setIsOpenMobile={setIsMobileMenuOpen}
         onOpenAdminPortal={() => setActiveTab('akun-admin')}
         onOpenRSVP={() => setIsRSVPOpen(true)}
+        onOpenKiosk={() => setIsKioskOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -420,6 +423,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenAdminPortal={() => setActiveTab('akun-admin')}
         onOpenQRScan={() => setIsQRScanOpen(true)}
+        onOpenKiosk={() => setIsKioskOpen(true)}
         onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         guestCount={guests.length}
       />
@@ -465,6 +469,7 @@ export default function App() {
             photos={photos}
             onAddPhoto={handleAddPhoto}
             onDeletePhoto={handleDeletePhoto}
+            onOpenKiosk={() => setIsKioskOpen(true)}
           />
         )}
 
@@ -525,6 +530,23 @@ export default function App() {
         onUpdateGuest={handleUpdateGuest}
         onDeleteGuest={handleDeleteGuest}
         onToggleSouvenir={handleUpdateGuestSouvenir}
+      />
+
+      {/* Interactive Kiosk / Reception TV Display Modal */}
+      <KioskDisplayModal
+        isOpen={isKioskOpen}
+        onClose={() => setIsKioskOpen(false)}
+        photos={photos}
+        guests={guests}
+        onOpenRSVP={() => {
+          setIsKioskOpen(false);
+          setIsRSVPOpen(true);
+        }}
+        onOpenQRScan={() => {
+          setIsKioskOpen(false);
+          setIsQRScanOpen(true);
+        }}
+        onAddPhoto={handleAddPhoto}
       />
     </div>
   );

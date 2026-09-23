@@ -11,6 +11,7 @@ interface SidebarNavProps {
   setIsOpenMobile: (open: boolean) => void;
   onOpenAdminPortal: () => void;
   onOpenRSVP?: () => void;
+  onOpenKiosk?: () => void;
   onLogout?: () => void;
 }
 
@@ -23,6 +24,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   setIsOpenMobile,
   onOpenAdminPortal,
   onOpenRSVP,
+  onOpenKiosk,
   onLogout,
 }) => {
   const mainNavItems: {
@@ -59,8 +61,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     },
     {
       id: 'galeri-wedding',
-      label: 'Galeri Foto',
-      sublabel: 'Live photo booth tamu',
+      label: 'Galeri & Display',
+      sublabel: 'Foto pengantin & live kiosk',
       icon: 'photo_library',
     },
     {
@@ -287,7 +289,28 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       </div>
 
       {/* Bottom Profile & Session Card */}
-      <div className="p-3 sm:p-4 border-t border-orange-100/80 bg-white/60">
+      <div className="p-3 sm:p-4 border-t border-orange-100/80 bg-white/60 space-y-2">
+        {onOpenKiosk && (
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpenMobile(false);
+              onOpenKiosk();
+            }}
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-stone-900 to-stone-800 hover:from-black hover:to-stone-900 text-amber-300 border border-amber-400/30 flex items-center justify-between text-xs font-bold shadow-xs active:scale-95 transition-all group"
+          >
+            <span className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-amber-400 group-hover:scale-110 transition-transform">
+                tv
+              </span>
+              <span>Layar Kiosk Tamu</span>
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-200 border border-amber-400/30">
+              Display
+            </span>
+          </button>
+        )}
+
         <div className="p-2.5 rounded-2xl bg-white border border-orange-200/70 shadow-xs flex items-center justify-between gap-2.5">
           <div
             onClick={() => handleSelectTab('akun-admin')}
